@@ -1,0 +1,53 @@
+﻿@model GalleryImageViewModel
+@{
+    ViewData["Title"] = "Chem's art gallery";
+    ViewData["Description"] = Model.Image.Title;
+    ViewData["Url"] = $"/gallery/{Model.Path}";
+    ViewData["Image"] = Model.Image.ImageUrl;
+}
+
+<div class="container-fluid p-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/gallery">
+                    <h1>Chem's gallery</h1>
+                </a>
+            </li>
+            @{
+                string fullPath = "";
+                @foreach (var part in Model.PathParts)
+                {
+                    if (part != "")
+                    {
+                        fullPath += $"{part}";
+                        <li class="breadcrumb-item align-self-center">
+                            <a href="/gallery/@fullPath">
+                                @part
+                            </a>
+                        </li>
+                        fullPath += "/";
+                    }
+                }
+            }
+        </ol>
+    </nav>
+
+    @if (Model.Path.Split("/").Last() != "")
+    {
+        <h2>
+            @Model.Path.Split("/").Last()
+        </h2>
+    }
+    else
+    {
+        <h2>
+            Gallery
+        </h2>
+    }
+
+    <div class="image-detail">
+        <img src="/art/@Model.Image.ImageUrl" />
+    </div>
+
+</div>

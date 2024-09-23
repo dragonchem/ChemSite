@@ -1,0 +1,23 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <meta content="@ViewData["Title"]" property="og:title" />
+    <meta content="@ViewData["Description"]" property="og:description" />
+    <meta content="@ViewData["Url"]" property="og:url" />
+    <meta content="@ViewData["Image"]" property="og:image" />
+    <meta content="#D5810E" data-react-helmet="true" name="theme-color" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ChemSite.styles.css" asp-append-version="true" />
+</head>
+<body>
+    @RenderBody()
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,97 @@
+﻿@model GalleryFolderViewModel
+@{
+    ViewData["Title"] = "Chem's art gallery";
+    ViewData["Description"] = "All the art of my characters.";
+    ViewData["Url"] = $"/gallery/{Model.Path}";
+    if (Model.Folders.Count > 0)
+    {
+        ViewData["Image"] = Model.Folders.First().ImageUrl;
+    }
+    else if (Model.Images.Count > 0)
+    {
+        ViewData["Image"] = Model.Images.First().ImageUrl;
+    }
+    else
+    {
+        ViewData["Image"] = "/art/Chem/art/20211231_-_Kitten_drago_chem - ShiraHoshiD.png";
+    }
+}
+
+<div class="container-fluid p-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/gallery">
+                    <h1>Chem's gallery</h1>
+                </a>
+            </li>
+            @{
+                string fullPath = "";
+                @foreach (var part in Model.PathParts)
+                {
+                    if (part != "")
+                    {
+                        fullPath += $"{part}";
+                        <li class="breadcrumb-item align-self-center">
+                            <a href="/gallery/@fullPath">
+                                @part
+                            </a>
+                        </li>
+                        fullPath += "/";
+                    }
+                }
+            }
+        </ol>
+    </nav>
+
+    @if (Model.Path.Split("/").Last() != "")
+    {
+        <h2>
+            @Model.Path.Split("/").Last()
+        </h2>
+    }
+    else
+    {
+        <h2>
+            Gallery
+        </h2>
+    }
+
+    <div class="container">
+        <h3>Folders</h3>
+        <div class="row">
+            @foreach (var item in Model.Folders)
+            {
+                <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@item.Title">
+                    <div class="card">
+                        <div class="card-img-top overflow-hidden">
+                            <img class="card-img-top" src="/thumb\@item.ImageUrl" alt="@item.Title">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Title</h5>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>Images</h3>
+        <div class="row">
+            @foreach (var item in Model.Images)
+            {
+                <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery/@Model.Path/@item.Title">
+                    <div class="card">
+                        <div class="card-img-top">
+                            <img src="/thumb\@item.ImageUrl" alt="@item.Title">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Title</h5>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</div>
