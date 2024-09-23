@@ -8,6 +8,13 @@
     <meta content="@ViewData["Description"]" property="og:description" />
     <meta content="@ViewData["Url"]" property="og:url" />
     <meta content="@ViewData["Image"]" property="og:image" />
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="@ViewData["Url"]" />
+    <meta property="twitter:title" content="@ViewData["Title"]" />
+    <meta property="twitter:description" content="@ViewData["Description"]" />
+    <meta property="twitter:image" content="@ViewData["Image"]" />
+
     <meta content="#D5810E" data-react-helmet="true" name="theme-color" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />

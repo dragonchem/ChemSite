@@ -1,15 +1,24 @@
 ﻿@model GalleryFolderViewModel
 @{
     ViewData["Title"] = "Chem's art gallery";
-    ViewData["Description"] = "All the art of my characters.";
-    ViewData["Url"] = $"/gallery/{Model.Path}";
-    if (Model.Folders.Count > 0)
+    if (Model.Path.Split("/").Last() != "")
     {
-        ViewData["Image"] = Model.Folders.First().ImageUrl;
+        ViewData["Title"] = $"Chem's art gallery - {String.Join(" > ", Model.PathParts)}";
+    }
+    ViewData["Description"] = $"Gallery{(Model.PathParts.First() != "" ? " > " : "")}{String.Join(" > ", Model.PathParts)}";
+    ViewData["Url"] = $"/gallery/{Model.Path}";
+    ViewData["Summary"] = "twitter:card";
+    if (Model.Path == "")
+    {
+        ViewData["Image"] = "/art/Chem/20211231_-_Kitten_drago_chem - ShiraHoshiD.png";
     }
     else if (Model.Images.Count > 0)
     {
-        ViewData["Image"] = Model.Images.First().ImageUrl;
+        ViewData["Image"] = $"/art/{Model.Images.First().ImageUrl}";
+    }
+    else if (Model.Folders.Count > 0)
+    {
+        ViewData["Image"] = $"/art/{Model.Folders.First().ImageUrl}";
     }
     else
     {
@@ -17,81 +26,83 @@
     }
 }
 
-<div class="container-fluid p-3">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="/gallery">
-                    <h1>Chem's gallery</h1>
-                </a>
-            </li>
-            @{
-                string fullPath = "";
-                @foreach (var part in Model.PathParts)
-                {
-                    if (part != "")
+<div class="flex min-vh-100 align-content-center">
+    <div class="container p-3 align-middle max-vh-95 overflow-y-scroll rounded-4 shadow-lg">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/gallery">
+                        <h1>Chem's gallery</h1>
+                    </a>
+                </li>
+                @{
+                    string fullPath = "";
+                    @foreach (var part in Model.PathParts)
                     {
-                        fullPath += $"{part}";
-                        <li class="breadcrumb-item align-self-center">
-                            <a href="/gallery/@fullPath">
-                                @part
-                            </a>
-                        </li>
-                        fullPath += "/";
+                        if (part != "")
+                        {
+                            fullPath += $"{part}";
+                            <li class="breadcrumb-item align-self-center">
+                                <a href="/gallery/@fullPath">
+                                    @part
+                                </a>
+                            </li>
+                            fullPath += "/";
+                        }
                     }
                 }
-            }
-        </ol>
-    </nav>
+            </ol>
+        </nav>
 
-    @if (Model.Path.Split("/").Last() != "")
-    {
-        <h2>
-            @Model.Path.Split("/").Last()
-        </h2>
-    }
-    else
-    {
-        <h2>
-            Gallery
-        </h2>
-    }
+        @if (Model.Path.Split("/").Last() != "")
+        {
+            <h2>
+                @Model.Path.Split("/").Last()
+            </h2>
+        }
+        else
+        {
+            <h2>
+                Gallery
+            </h2>
+        }
 
-    <div class="container">
-        <h3>Folders</h3>
-        <div class="row">
-            @foreach (var item in Model.Folders)
-            {
-                <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@item.Title">
-                    <div class="card">
-                        <div class="card-img-top overflow-hidden">
-                            <img class="card-img-top" src="/thumb\@item.ImageUrl" alt="@item.Title">
+        <div class="container shadow-lg rounded-3 section p-3 mt-3">
+            <h3 class="mb-3">Folders</h3>
+            <div class="row">
+                @foreach (var item in Model.Folders)
+                {
+                    <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@item.Title">
+                        <div class="card">
+                            <div class="card-img-top overflow-hidden">
+                                <img class="card-img-top" src="/thumb\@item.ImageUrl" alt="@item.Title">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">@item.Title</h5>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <h5 class="card-title">@item.Title</h5>
-                        </div>
-                    </div>
-                </a>
-            }
+                    </a>
+                }
+            </div>
         </div>
-    </div>
 
-    <div class="container">
-        <h3>Images</h3>
-        <div class="row">
-            @foreach (var item in Model.Images)
-            {
-                <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery/@Model.Path/@item.Title">
-                    <div class="card">
-                        <div class="card-img-top">
-                            <img src="/thumb\@item.ImageUrl" alt="@item.Title">
+        <div class="container shadow-lg rounded-3 section p-3 mt-3">
+            <h3 class="mb-3">Images</h3>
+            <div class="row">
+                @foreach (var item in Model.Images)
+                {
+                    <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery/@Model.Path/@item.Title">
+                        <div class="card">
+                            <div class="card-img-top overflow-hidden">
+                                <img class="card-img-top" src="/thumb\@item.ImageUrl" alt="@item.Title">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">@item.Title</h5>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <h5 class="card-title">@item.Title</h5>
-                        </div>
-                    </div>
-                </a>
-            }
+                    </a>
+                }
+            </div>
         </div>
     </div>
 </div>

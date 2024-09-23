@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.Extensions.Hosting.Internal;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Versioning;
 using static System.Net.Mime.MediaTypeNames;
 
