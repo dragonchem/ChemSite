@@ -153,6 +153,10 @@ a {
   text-decoration: none;
 }
 
+.btn-primary {
+
+}
+
 .image-detail {
   max-height: 70vh;
   max-width: 100%;
@@ -190,6 +194,10 @@ img[alt="kinky"] {
 
 .section {
   background-color: #2A1514;
+}
+
+.hidden {
+    display: none;
 }
 
 @media screen and (max-width: 575px) {

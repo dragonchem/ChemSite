@@ -1,0 +1,49 @@
+﻿@model StaticPageViewModel
+@{
+    bool sfwGalleryPossible = true;
+    foreach (var param in Model.QueryParams)
+    {
+        if (param.Value.ToString().ToLower().Replace("nsfwgallery", "").Contains("kinky") || param.Value.ToString().ToLower().Replace("nsfwgallery", "").Contains("nsfw"))
+        {
+            sfwGalleryPossible = false;
+        }
+    }
+
+    string backUrl = "/";
+    backUrl = Model.QueryParams["url"].ToString().Replace("nsfwgallery", "gallery");
+
+    string nsfwBackUrl = Model.QueryParams["url"].ToString();
+
+
+    <script>
+        const sfwGalleryPossible = @sfwGalleryPossible.ToString().ToLower();
+        const backUrl = "@backUrl";
+        const nsfwBackUrl = "@nsfwBackUrl";
+        if (sfwGalleryPossible && backUrl.length > 0) {
+            window.location.href = backUrl;
+        }
+
+        function onContinueClick() {
+            localStorage.setItem("NSFW", true);
+            window.location.href = nsfwBackUrl;
+        }
+    </script>
+
+
+    <div class="flex min-vh-100 align-content-center">
+        <div class="container p-3 align-middle max-vh-95 overflow-y-scroll rounded-4 shadow-lg">
+            <div>
+                <h1>Warning!</h1>
+                <div class="container section p-3 mt-3 rounded-4 shadow-lg">
+                    <p class="mb-0">You are about to a webpage that could contain 18+ content.</p>
+                    <p class="mb-0">Are you sure you want to continue?</p>
+                    <div class="flex mt-3">
+                        <a href="/" class="btn btn-outline-secondary">Go back</a>
+                        <a onclick="onContinueClick()" class="btn btn-outline-danger">Continue</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

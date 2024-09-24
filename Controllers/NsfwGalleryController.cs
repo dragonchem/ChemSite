@@ -12,14 +12,14 @@ using static System.Net.Mime.MediaTypeNames;
 namespace ChemSite.Controllers
 {
     [SupportedOSPlatform("windows")]
-    public class GalleryController : Controller
+    public class NsfwGalleryController : Controller
     {
         private readonly string artBasePath;
         private readonly string thumbBasePath;
         private static readonly List<string> ImageExtensions = new List<string> { ".JPG", ".JPEG", ".JPE", ".BMP", ".GIF", ".PNG" };
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public GalleryController(IWebHostEnvironment webHostEnvironment)
+        public NsfwGalleryController(IWebHostEnvironment webHostEnvironment)
         {
             _webHostEnvironment = webHostEnvironment;
             artBasePath = Path.Combine(webHostEnvironment.WebRootPath, "art");
@@ -55,10 +55,8 @@ namespace ChemSite.Controllers
 
             if (!Directory.Exists(fullPath)) return NotFound();
 
-            if (path.Contains("nsfw") || path.Contains("kinky")) return NotFound();
-
-            string[] directories = Directory.GetDirectories(Path.Combine(artBasePath, path)).Where(x=> !x.Contains("nsfw") && !x.Contains("kinky")).ToArray();
-            string[] files = Directory.GetFiles(Path.Combine(artBasePath, path)).Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper())).Where(x => !x.Contains("nsfw") && !x.Contains("kinky")).ToArray();
+            string[] directories = Directory.GetDirectories(Path.Combine(artBasePath, path));
+            string[] files = Directory.GetFiles(Path.Combine(artBasePath, path)).Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper())).ToArray();
 
             foreach (var directory in directories)
             {

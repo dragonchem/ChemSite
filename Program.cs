@@ -27,7 +27,15 @@ app.MapControllerRoute(
 );
 
 app.MapControllerRoute(
+    name: "nsfwgallery",
+    pattern: "NsfwGallery/{*path}",
+    defaults: new { controller = "NsfwGallery", action = "Index" }
+);
+
+app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{*path}",
+    defaults: new { controller = "StaticPage", action = "Index" }
+);
 
 app.Run();

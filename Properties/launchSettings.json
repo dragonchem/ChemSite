@@ -12,7 +12,7 @@
     "https": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "gallery/Chem/nsfw/kinky/AxiemizeFurther - minkoftheend.png",
+      "launchUrl": "disclaimer",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

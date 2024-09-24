@@ -1,0 +1,70 @@
+﻿@model GalleryImageViewModel
+@{
+    ViewData["Title"] = "Chem's art gallery (NSFW)";
+    if (Model.Path.Split("/").Last() != "")
+    {
+        ViewData["Title"] = $"Chem's art gallery (NSFW) - {String.Join(" > ", Model.PathParts)}";
+    }
+    ViewData["Description"] = $"NSFW Gallery{(Model.PathParts.First() != "" ? " > " : "")}{String.Join(" > ", Model.PathParts)}";
+    ViewData["Url"] = $"/nsfwgallery/{Model.Path}";
+    ViewData["Image"] = $"/art/{Model.Image.ImageUrl}";
+    ViewData["Summary"] = "twitter:card";
+}
+
+<script>
+    const nsfw = localStorage.getItem("NSFW") === 'true';
+
+    if (!nsfw) {
+        window.location.href = `/disclaimer?url=${encodeURI(window.location.pathname)}`
+    }
+</script>
+
+<div class="flex min-vh-100 align-content-center">
+    <div class="container p-3 align-middle max-vh-95 overflow-y-scroll rounded-4 shadow-lg">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/nsfwgallery">
+                        <h1>Chem's gallery</h1>
+                    </a>
+                </li>
+                @{
+                    string fullPath = "";
+                    @foreach (var part in Model.PathParts)
+                    {
+                        if (part != "")
+                        {
+                            fullPath += $"{part}";
+                            <li class="breadcrumb-item align-self-center">
+                                <a href="/nsfwgallery/@fullPath">
+                                    @part
+                                </a>
+                            </li>
+                            fullPath += "/";
+                        }
+                    }
+                }
+            </ol>
+        </nav>
+
+        @if (Model.Path.Split("/").Last() != "")
+        {
+            <h2>
+                @Model.Path.Split("/").Last()
+            </h2>
+        }
+        else
+        {
+            <h2>
+                Gallery
+            </h2>
+        }
+
+        <div class="image-detail d-flex container shadow-lg rounded-3 section p-3 mt-3">
+            <a href="/art/@Model.Image.ImageUrl" target="_blank">
+                <img src="/art/@Model.Image.ImageUrl" />
+            </a>
+        </div>
+
+    </div>
+</div>
