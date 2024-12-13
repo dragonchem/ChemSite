@@ -39,8 +39,13 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
+                    <a href="/">
+                        <img src="~/art/Chem/emotes/chemHi.png" />
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
                     <a href="/nsfwgallery">
-                        <h1>Chem's gallery (NSFW)</h1>
+                        <h1>Gallery (NSFW)</h1>
                     </a>
                 </li>
                 @{
@@ -83,7 +88,7 @@
                     <a class="col-lg-2 col-md-3 col-6 mb-3" href="/nsfwgallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@item.Title">
                         <div class="card">
                             <div class="card-img-top overflow-hidden">
-                                <img class="card-img-top" src="/thumb\@item.ImageUrl" alt="@item.Title">
+                                <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title">
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">@item.Title</h5>
@@ -102,7 +107,7 @@
                     <a class="col-lg-2 col-md-3 col-6 mb-3" href="/nsfwgallery/@Model.Path/@item.Title">
                         <div class="card">
                             <div class="card-img-top overflow-hidden">
-                                <img class="card-img-top" src="/thumb\@item.ImageUrl" alt="@item.Title">
+                                <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title">
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">@item.Title</h5>

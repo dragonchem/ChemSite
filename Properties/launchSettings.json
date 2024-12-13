@@ -12,7 +12,6 @@
     "https": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "disclaimer",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

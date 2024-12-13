@@ -24,8 +24,13 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
+                    <a href="/">
+                        <img src="~/art/Chem/emotes/chemHi.png" />
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
                     <a href="/nsfwgallery">
-                        <h1>Chem's gallery</h1>
+                        <h1>Gallery (NSFW)</h1>
                     </a>
                 </li>
                 @{
@@ -62,7 +67,7 @@
 
         <div class="image-detail d-flex container shadow-lg rounded-3 section p-3 mt-3">
             <a href="/art/@Model.Image.ImageUrl" target="_blank">
-                <img src="/art/@Model.Image.ImageUrl" />
+                <img src="~/art/@Model.Image.ImageUrl" />
             </a>
         </div>
 

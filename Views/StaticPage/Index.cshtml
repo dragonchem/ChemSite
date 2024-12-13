@@ -1,19 +1,116 @@
 ﻿@{
-    ViewData["Title"] = "Chem's site";
-    ViewData["Description"] = "An awesome derg's personal site.";
+    ViewData["Title"] = "Chem's links";
+    ViewData["Description"] = "Links to all my social media and where to find me!";
     ViewData["Url"] = "/";
-    ViewData["Image"] = "/art/Chem/art/20211231_-_Kitten_drago_chem - ShiraHoshiD.png";
+    ViewData["Image"] = "/home-embed.png";
 }
 
-<div>
-    <label for="18plus">
-        18+ mode
-    </label>
-    <input id="18plus" type="checkbox" onchange="change()" />
+<div class="flex min-vh-100 align-content-center home-container">
+    <div class="container p-3 align-middle max-vh-95 rounded-2 shadow-lg home">
+        <ul>
+            <li class="discord">
+                <a href="https://discordapp.com/channels/&#64me/155386178764406784" class="btn btn-primary">
+                    <p>Discord (dragon_chem)</p>
+                    <i class="fa-brands fa-discord"></i>
+                </a>
+            </li>
+            <li class="discord">
+                <a href="https://discord.gg/d8SVpmhaRn" class="btn btn-primary">
+                    <p>Discord (Emote server)</p>
+                    <i class="fa-brands fa-discord"></i>
+                </a>
+            </li>
+            <li class="nsfw hidden discord">
+                <a href="https://discord.gg/wna494gZvt" class="btn btn-primary">
+                    <p>Discord (NSFW)</p>
+                    <i class="fa-brands fa-discord"></i>
+                </a>
+            </li>
+            <li class="bluesky">
+                <a href="https://bsky.app/profile/dragonchem.bsky.social" class="btn btn-primary">
+                    <p>Bluesky</p>
+                    <i class="fa-brands fa-bluesky"></i>
+                </a>
+            </li>
+            <li class="nsfw hidden bluesky">
+                <a href="https://bsky.app/profile/dragonchemnsfw.bsky.social" class="btn btn-primary">
+                    <p>Bluesky (NSFW)</p>
+                    <i class="fa-brands fa-bluesky"></i>
+                </a>
+            </li>
+            <li class="gallery">
+                <a href="/gallery" class="btn btn-primary">
+                    <p>Gallery</p>
+                    <i class="fa-solid fa-image"></i>
+                </a>
+            </li>
+            <li class="nsfw hidden gallery">
+                <a href="/nsfwgallery" class="btn btn-primary">
+                    <p>Gallery (NSFW)</p>
+                    <i class="fa-solid fa-image"></i>
+                </a>
+            </li>
+            <li class="youtube">
+                <a href="https://www.youtube.com/&#64Dragon_Chem" class="btn btn-primary">
+                    <p>YouTube</p>
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+            </li>
+            <li class="youtube">
+                <a href="https://www.youtube.com/&#64thescoundrels8687" class="btn btn-primary">
+                    <p>YouTube (Group channel)</p>
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+            </li>
+            <li class="steam">
+                <a href="https://steamcommunity.com/id/dragon_chem/" class="btn btn-primary">
+                    <p>Steam</p>
+                    <i class="fa-brands fa-steam"></i>
+                </a>
+            </li>
+        </ul>
+        <div class="form-check">
+            <input class="form-check-input" id="18plus" type="checkbox" onchange="change()" />
+            <label class="form-check-label" for="18plus">
+                18+ mode
+            </label>
+        </div>
+    </div>
 </div>
 
-<a href="/gallery">Gallery</a>
-<a href="/nsfwgallery" class="nsfw hidden">Gallery (NSFW)</a>
+<div class="background-container">
+    <div id="background" class="none">
+        <div class="background-item">
+            <div class="partition">
+                <img src="~/art/Berry/Berry_clothed_ref - tomi.png" />
+            </div>
+        </div>
+        <div class="background-item">
+            <div class="partition skew">
+                <img src="~/art/Milkshake/Ref - Kovat.png" />
+            </div>
+            <div class="line"></div>
+        </div>
+        <div class="background-item">
+            <div class="partition skew">
+                <img src="~/art/Chem/chemreflatest - beaniilol.png" />
+            </div>
+            <div class="line"></div>
+        </div>
+        <div class="background-item">
+            <div class="partition skew">
+                <img src="~/art/Mallow/mallow.png" />
+            </div>
+            <div class="line"></div>
+        </div>
+        <div class="background-item">
+            <div class="partition skew">
+                <img src="~/art/Gibby/ref - skye_uwu.png" />
+            </div>
+            <div class="line"></div>
+        </div>
+    </div>
+</div>
 
 <script>
     function setGalleryVisible(visible) {
@@ -35,8 +132,34 @@
         setGalleryVisible(input.checked);
     }
 
+    const background = document.getElementById("background");
+
+    function hoverEnter(ev) {
+        const classList = ev.target.classList;
+        classList.remove("nsfw");
+        classList.remove("hidden");
+
+        const cssclass = classList[0];
+        background.classList.add(cssclass);
+        background.classList.remove("none");
+    }
+
+    function hoverExit(ev) {
+        const classList = ev.target.classList;
+        classList.remove("nsfw");
+        classList.remove("hidden");
+
+        const cssclass = classList[0];
+        background.classList.remove(cssclass);
+        background.classList.add("none");
+    }
+
     const visible = localStorage.getItem("NSFW") == "true";
     const input = document.getElementById("18plus");
     input.checked = visible;
     setGalleryVisible(visible);
+
+    const hoverLists = document.querySelectorAll("li");
+    hoverLists.forEach(el => el.onmouseenter = this.hoverEnter);
+    hoverLists.forEach(el => el.onmouseleave = this.hoverExit);
 </script>
