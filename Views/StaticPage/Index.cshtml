@@ -20,7 +20,7 @@
                     <i class="fa-brands fa-discord"></i>
                 </a>
             </li>
-            <li class="nsfw hidden discord">
+            <li class="discord nsfw hidden">
                 <a href="https://discord.gg/wna494gZvt" class="btn btn-primary">
                     <p>Discord (NSFW)</p>
                     <i class="fa-brands fa-discord"></i>
@@ -32,7 +32,7 @@
                     <i class="fa-brands fa-bluesky"></i>
                 </a>
             </li>
-            <li class="nsfw hidden bluesky">
+            <li class="bluesky nsfw hidden">
                 <a href="https://bsky.app/profile/dragonchemnsfw.bsky.social" class="btn btn-primary">
                     <p>Bluesky (NSFW)</p>
                     <i class="fa-brands fa-bluesky"></i>
@@ -44,7 +44,7 @@
                     <i class="fa-solid fa-image"></i>
                 </a>
             </li>
-            <li class="nsfw hidden gallery">
+            <li class="gallery nsfw hidden">
                 <a href="/nsfwgallery" class="btn btn-primary">
                     <p>Gallery (NSFW)</p>
                     <i class="fa-solid fa-image"></i>
@@ -136,8 +136,6 @@
 
     function hoverEnter(ev) {
         const classList = ev.target.classList;
-        classList.remove("nsfw");
-        classList.remove("hidden");
 
         const cssclass = classList[0];
         background.classList.add(cssclass);
@@ -146,8 +144,6 @@
 
     function hoverExit(ev) {
         const classList = ev.target.classList;
-        classList.remove("nsfw");
-        classList.remove("hidden");
 
         const cssclass = classList[0];
         background.classList.remove(cssclass);
