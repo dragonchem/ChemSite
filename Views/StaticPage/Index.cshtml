@@ -8,61 +8,61 @@
 <div class="flex min-vh-100 align-content-center home-container">
     <div class="container p-3 align-middle max-vh-95 rounded-2 shadow-lg home">
         <ul>
-            <li class="discord">
+            <li class="discord hoverable">
                 <a href="https://discordapp.com/channels/&#64me/155386178764406784" class="btn btn-primary">
                     <p>Discord (dragon_chem)</p>
                     <i class="fa-brands fa-discord"></i>
                 </a>
             </li>
-            <li class="discord">
+            <li class="discord hoverable">
                 <a href="https://discord.gg/d8SVpmhaRn" class="btn btn-primary">
                     <p>Discord (Emote server)</p>
                     <i class="fa-brands fa-discord"></i>
                 </a>
             </li>
-            <li class="discord nsfw hidden">
+            <li class="discord nsfw hidden hoverable">
                 <a href="https://discord.gg/wna494gZvt" class="btn btn-primary">
                     <p>Discord (NSFW)</p>
                     <i class="fa-brands fa-discord"></i>
                 </a>
             </li>
-            <li class="bluesky">
-                <a href="https://bsky.app/profile/dragonchem.bsky.social" class="btn btn-primary">
+            <li class="bluesky hoverable">
+                <a href="https://bsky.app/profile/dragon-chem.net" class="btn btn-primary">
                     <p>Bluesky</p>
                     <i class="fa-brands fa-bluesky"></i>
                 </a>
             </li>
-            <li class="bluesky nsfw hidden">
-                <a href="https://bsky.app/profile/dragonchemnsfw.bsky.social" class="btn btn-primary">
+            <li class="bluesky nsfw hidden hoverable">
+                <a href="https://bsky.app/profile/nsfw.dragon-chem.net" class="btn btn-primary">
                     <p>Bluesky (NSFW)</p>
                     <i class="fa-brands fa-bluesky"></i>
                 </a>
             </li>
-            <li class="gallery">
+            <li class="gallery hoverable">
                 <a href="/gallery" class="btn btn-primary">
                     <p>Gallery</p>
                     <i class="fa-solid fa-image"></i>
                 </a>
             </li>
-            <li class="gallery nsfw hidden">
+            <li class="gallery nsfw hidden hoverable">
                 <a href="/nsfwgallery" class="btn btn-primary">
                     <p>Gallery (NSFW)</p>
                     <i class="fa-solid fa-image"></i>
                 </a>
             </li>
-            <li class="youtube">
+            <li class="youtube hoverable">
                 <a href="https://www.youtube.com/&#64Dragon_Chem" class="btn btn-primary">
                     <p>YouTube</p>
                     <i class="fa-brands fa-youtube"></i>
                 </a>
             </li>
-            <li class="youtube">
+            <li class="youtube hoverable">
                 <a href="https://www.youtube.com/&#64thescoundrels8687" class="btn btn-primary">
                     <p>YouTube (Group channel)</p>
                     <i class="fa-brands fa-youtube"></i>
                 </a>
             </li>
-            <li class="steam">
+            <li class="steam hoverable">
                 <a href="https://steamcommunity.com/id/dragon_chem/" class="btn btn-primary">
                     <p>Steam</p>
                     <i class="fa-brands fa-steam"></i>
@@ -80,32 +80,37 @@
 
 <div class="background-container">
     <div id="background" class="none">
-        <div class="background-item">
+        <div class="discord hoverable background-item">
             <div class="partition">
                 <img src="~/art/Berry/Berry_clothed_ref - tomi.png" />
+                <a href="https://discordapp.com/channels/&#64me/155386178764406784"></a>
             </div>
         </div>
-        <div class="background-item">
+        <div class="bluesky hoverable background-item">
             <div class="partition skew">
                 <img src="~/art/Milkshake/Ref - Kovat.png" />
+                <a href="https://bsky.app/profile/dragon-chem.net"></a>
             </div>
             <div class="line"></div>
         </div>
-        <div class="background-item">
+        <div class="gallery hoverable background-item">
             <div class="partition skew">
                 <img src="~/art/Chem/chemreflatest - beaniilol.png" />
+                <a href="/gallery"></a>
             </div>
             <div class="line"></div>
         </div>
-        <div class="background-item">
+        <div class="youtube hoverable background-item">
             <div class="partition skew">
                 <img src="~/art/Mallow/mallow.png" />
+                <a href="https://www.youtube.com/&#64Dragon_Chem"></a>
             </div>
             <div class="line"></div>
         </div>
-        <div class="background-item">
+        <div class="steam hoverable background-item">
             <div class="partition skew">
                 <img src="~/art/Gibby/ref - skye_uwu.png" />
+                <a href="https://steamcommunity.com/id/dragon_chem"></a>
             </div>
             <div class="line"></div>
         </div>
@@ -155,7 +160,7 @@
     input.checked = visible;
     setGalleryVisible(visible);
 
-    const hoverLists = document.querySelectorAll("li");
+    const hoverLists = document.querySelectorAll(".hoverable");
     hoverLists.forEach(el => el.onmouseenter = this.hoverEnter);
     hoverLists.forEach(el => el.onmouseleave = this.hoverExit);
 </script>
