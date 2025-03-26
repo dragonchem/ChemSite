@@ -12,17 +12,9 @@
     {
         ViewData["Image"] = "/art/Chem/20211231_-_Kitten_drago_chem - ShiraHoshiD.png";
     }
-    else if (Model.Images.Count > 0)
-    {
-        ViewData["Image"] = $"/art/{Model.Images.First().ImageUrl}";
-    }
-    else if (Model.Folders.Count > 0)
-    {
-        ViewData["Image"] = $"/art/{Model.Folders.First().ImageUrl}";
-    }
     else
     {
-        ViewData["Image"] = "/art/Chem/art/20211231_-_Kitten_drago_chem - ShiraHoshiD.png";
+        ViewData["Image"] = "/thumb/gallery" + Model.ImageUrl;
     }
 }
 

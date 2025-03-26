@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.Extensions.Hosting.Internal;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.IO;
 using System.Reflection;
+using ImageMagick;
 using System.Runtime.Versioning;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -16,6 +18,7 @@ namespace ChemSite.Controllers
     {
         private readonly string artBasePath;
         private readonly string thumbBasePath;
+        private readonly string galleryThumbBasePath;
         private static readonly List<string> ImageExtensions = new List<string> { ".JPG", ".JPEG", ".JPE", ".BMP", ".GIF", ".PNG" };
         private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -24,6 +27,7 @@ namespace ChemSite.Controllers
             _webHostEnvironment = webHostEnvironment;
             artBasePath = Path.Combine(webHostEnvironment.WebRootPath, "art");
             thumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb");
+            galleryThumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb", "gallery");
         }
 
         public IActionResult Index(string path)
@@ -56,7 +60,12 @@ namespace ChemSite.Controllers
             if (!Directory.Exists(fullPath)) return NotFound();
 
             string[] directories = Directory.GetDirectories(Path.Combine(artBasePath, path));
-            string[] files = Directory.GetFiles(Path.Combine(artBasePath, path)).Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper())).ToArray();
+            string[] files = new DirectoryInfo(Path.Combine(artBasePath, path))
+                .GetFiles()
+                .OrderByDescending(f => f.LastWriteTime)
+                .Select(f => Path.Combine(artBasePath, path, f.Name))
+                .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
+                .ToArray();
 
             foreach (var directory in directories)
             {
@@ -85,7 +94,62 @@ namespace ChemSite.Controllers
                 });
             }
 
+            var amount = files.Length;
+            if (files.Length >= 9) amount = 9;
+            var galleryFiles = files.Take(amount).ToList();
+
+            if (amount < 9)
+            {
+                foreach (var directory in directories)
+                {
+                    if (directory.Contains("nsfw") && !path.Contains("nsfw")) continue;
+                    var images = FindDirectoryImages(directory, 0);
+
+                    foreach (var image in images)
+                    {
+                        galleryFiles.Add(image);
+                        if (galleryFiles.Count >= 9)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            folderViewModel.ImageUrl = GenerateGalleryImage(galleryFiles.ToArray(), galleryFiles[0].Replace(artBasePath, galleryThumbBasePath));
+
             return View("Folder", folderViewModel);
+        }
+
+        private List<string> FindDirectoryImages(string dir, int depth, List<string>? images = null)
+        {
+            if (images == null) images = new List<string>();
+            if (!Directory.Exists(dir)) return images;
+
+            string[] files = new DirectoryInfo(Path.Combine(artBasePath, dir))
+                .GetFiles()
+                .OrderByDescending(f => f.LastWriteTime)
+                .Select(f => Path.Combine(artBasePath, dir, f.Name))
+                .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
+                .ToArray();
+            List<string> filteredFiles = files.Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper())).ToList();
+            foreach (string file in filteredFiles)
+            {
+                images.Add(file);
+
+                if (images.Count >= 9) return images;
+            }
+
+            string[] dirs = Directory.GetDirectories(dir);
+            foreach (string directory in dirs)
+            {
+                if (directory.Contains("nsfw") && !dir.Contains("nsfw")) continue;
+                images = FindDirectoryImages(directory, depth, images);
+
+                if (images.Count >= 9) return images;
+            }
+
+            return images;
         }
 
         private string FindDirectoryImage(string dir, int depth)
@@ -93,7 +157,12 @@ namespace ChemSite.Controllers
             if (depth > 5) return "";
             if (!Directory.Exists(dir)) return "";
 
-            string[] files = Directory.GetFiles(dir);
+            string[] files = new DirectoryInfo(Path.Combine(artBasePath, dir))
+                .GetFiles()
+                .OrderByDescending(f => f.LastWriteTime)
+                .Select(f => Path.Combine(artBasePath, dir, f.Name))
+                .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
+                .ToArray();
             List<string> filteredFiles = files.Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper())).ToList();
             if (filteredFiles.Count > 0) return filteredFiles[0];
 
@@ -105,16 +174,161 @@ namespace ChemSite.Controllers
 
         private string GetDirectoryImage(string dir)
         {
-            string image = RemoveFilePath(FindDirectoryImage(dir, 0));
-            if (image == "") return "";
+            string thumbPath = Path.Combine(thumbBasePath, RemoveFilePath(dir + ".png"));
+            if (System.IO.File.Exists(thumbPath)) return thumbPath;
+            List<string> images = FindDirectoryImages(dir, 0).ToList();
+            if (images.Count == 0) return "";
 
-            string thumbPath = Path.Combine(thumbBasePath, image);
-            if (!System.IO.File.Exists(thumbPath))
-            {
-                GenerateThumbnailImage(Path.Combine(artBasePath, image), Path.Combine(thumbBasePath, image), thumbPath.Replace(thumbPath.Split("\\").Last(), ""));
-            }
-
+            GenerateFolderImage(images.ToArray(), thumbPath, thumbPath.Replace(thumbPath.Split("\\").Last(), ""));
             return thumbPath;
+        }
+
+        private string GenerateGalleryImage(string[] originalPath, string thumbDir)
+        {
+            if (System.IO.File.Exists(thumbDir)) return thumbDir.Replace(galleryThumbBasePath, "");
+            Directory.CreateDirectory(thumbDir.Replace(Path.GetFileName(thumbDir), ""));
+            using (MagickImageCollection collection = new MagickImageCollection())
+            {
+                for (int i = 0; i < originalPath.Length; i++)
+                {
+                    MagickImage image = new MagickImage(originalPath[i]);
+
+                    var resize = image.Width;
+                    if (image.Height < resize) resize = image.Height;
+
+                    image.Resize(new MagickGeometry
+                    {
+                        Width = resize,
+                        Height = resize,
+                        FillArea = true,
+                    });
+                    image.Crop(new MagickGeometry()
+                    {
+                        Height = resize,
+                        Width = resize,
+                    }, Gravity.Center);
+
+                    string? dir = Path.GetDirectoryName(originalPath[i]);
+                    if (dir != null && (dir.EndsWith("nsfw") || dir.EndsWith("kinky"))) image.Blur(25, 25);
+                    collection.Add(image);
+                }
+
+                MagickGeometry tileGeometry;
+                switch (originalPath.Length)
+                {
+                    case 1:
+                        tileGeometry = new MagickGeometry(0, 0, 1, 1);
+                        break;
+                    case 2:
+                        tileGeometry = new MagickGeometry(0, 0, 2, 1);
+                        break;
+                    case 3:
+                        tileGeometry = new MagickGeometry(0, 0, 2, 2);
+                        break;
+                    case 4:
+                        tileGeometry = new MagickGeometry(0, 0, 2, 2);
+                        break;
+                    case 5:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 2);
+                        break;
+                    case 6:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 2);
+                        break;
+                    case 7:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 3);
+                        break;
+                    case 8:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 3);
+                        break;
+                    default:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 3);
+                        break;
+                }
+
+                using (IMagickImage result = collection.Montage(new MontageSettings
+                {
+                    BackgroundColor = MagickColors.None,
+                    Geometry = new MagickGeometry(10, 10, 1000, 1000), // -geometry +5+5
+                    TileGeometry = tileGeometry
+                }))
+                {
+                    result.Write(thumbDir);
+                    return thumbDir.Replace(galleryThumbBasePath, "");
+                }
+            }
+        }
+
+        private void GenerateFolderImage(string[] originalPath, string thumbPath, string thumbDir)
+        {
+            Directory.CreateDirectory(thumbDir);
+            using (MagickImageCollection collection = new MagickImageCollection())
+            {
+                for (int i = 0; i < originalPath.Length; i++)
+                {
+                    MagickImage image = new MagickImage(originalPath[i]);
+
+                    var resize = image.Width;
+                    if (image.Height > resize) resize = image.Height;
+
+                    image.Resize(new MagickGeometry
+                    {
+                        Width = resize,
+                        Height = resize,
+                        FillArea = true,
+                    });
+                    image.Crop(new MagickGeometry()
+                    {
+                        Height = resize,
+                        Width = resize,
+                    }, Gravity.Center);
+
+                    string? dir = Path.GetDirectoryName(originalPath[i]);
+                    if (dir != null && (dir.EndsWith("nsfw") || dir.EndsWith("kinky"))) image.Blur(25, 25);
+                    collection.Add(image);
+                }
+
+                MagickGeometry tileGeometry;
+                switch(originalPath.Length)
+                {
+                    case 1:
+                        tileGeometry = new MagickGeometry(0, 0, 1, 1);
+                        break;
+                    case 2:
+                        tileGeometry = new MagickGeometry(0, 0, 2, 1);
+                        break;
+                    case 3:
+                        tileGeometry = new MagickGeometry(0, 0, 2, 2);
+                        break;
+                    case 4:
+                        tileGeometry = new MagickGeometry(0, 0, 2, 2);
+                        break;
+                    case 5:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 2);
+                        break;
+                    case 6:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 2);
+                        break;
+                    case 7:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 3);
+                        break;
+                    case 8:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 3);
+                        break;
+                    default:
+                        tileGeometry = new MagickGeometry(0, 0, 3, 3);
+                        break;
+                }
+
+                using (IMagickImage result = collection.Montage(new MontageSettings
+                {
+                    BackgroundColor = MagickColors.None,
+                    Geometry = new MagickGeometry(2, 2, 200, 200), // -geometry +5+5
+                    TileGeometry = tileGeometry
+                }))
+                {
+                    result.Write(thumbPath);
+                }
+            }
         }
 
         private void GenerateThumbnailImage(string originalPath, string thumbPath, string thumbDir)
@@ -124,8 +338,8 @@ namespace ChemSite.Controllers
             System.Drawing.Image image = ReadImageFromFile(originalPath);
 
             // Figure out the ratio
-            double ratioX = (double)200 / (double)image.Width;
-            double ratioY = (double)200 / (double)image.Height;
+            double ratioX = (double)400 / (double)image.Width;
+            double ratioY = (double)400 / (double)image.Height;
             // use whichever multiplier is smaller
             double ratio = ratioX < ratioY ? ratioX : ratioY;
 

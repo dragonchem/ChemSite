@@ -7,6 +7,7 @@
         public string[] PathParts { get; set; } = Array.Empty<string>();
         public string Path { get; set; } = "";
         public string Title { get; set; } = "";
+        public string ImageUrl { get; set; } = "";
     }
 
     public class GalleryFolderContent

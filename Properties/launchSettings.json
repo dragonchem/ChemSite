@@ -12,6 +12,7 @@
     "https": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "nsfwgallery",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
