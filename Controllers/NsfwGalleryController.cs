@@ -19,6 +19,7 @@ namespace ChemSite.Controllers
         private readonly string artBasePath;
         private readonly string thumbBasePath;
         private readonly string galleryThumbBasePath;
+        private readonly string folderThumbBasePath;
         private static readonly List<string> ImageExtensions = new List<string> { ".JPG", ".JPEG", ".JPE", ".BMP", ".GIF", ".PNG" };
         private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -28,6 +29,7 @@ namespace ChemSite.Controllers
             artBasePath = Path.Combine(webHostEnvironment.WebRootPath, "art");
             thumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb");
             galleryThumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb", "gallery");
+            folderThumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb", "folder");
         }
 
         public IActionResult Index(string path)
@@ -116,7 +118,10 @@ namespace ChemSite.Controllers
                 }
             }
 
-            folderViewModel.ImageUrl = GenerateGalleryImage(galleryFiles.ToArray(), galleryFiles[0].Replace(artBasePath, galleryThumbBasePath));
+            var galleryfile = GetFirstDirectoryImage(Path.Combine(artBasePath, path));
+            string relativeDir = path.Replace(artBasePath, "");
+            if (relativeDir.StartsWith("\\")) relativeDir = relativeDir.Substring(1);
+            folderViewModel.ImageUrl = GenerateGalleryImage(galleryFiles.ToArray(), Path.Combine(galleryThumbBasePath, relativeDir, Path.GetFileName(galleryfile)));
 
             return View("Folder", folderViewModel);
         }
@@ -174,13 +179,36 @@ namespace ChemSite.Controllers
 
         private string GetDirectoryImage(string dir)
         {
-            string thumbPath = Path.Combine(thumbBasePath, RemoveFilePath(dir + ".png"));
+            string file = GetFirstDirectoryImage(dir);
+            string relativeDir = dir.Replace(artBasePath, "");
+            if (relativeDir.StartsWith("\\")) relativeDir = relativeDir.Substring(1);
+            string thumbPath = Path.Combine(folderThumbBasePath, relativeDir, Path.GetFileName(file));
             if (System.IO.File.Exists(thumbPath)) return thumbPath;
             List<string> images = FindDirectoryImages(dir, 0).ToList();
             if (images.Count == 0) return "";
 
             GenerateFolderImage(images.ToArray(), thumbPath, thumbPath.Replace(thumbPath.Split("\\").Last(), ""));
             return thumbPath;
+        }
+
+        private string GetFirstDirectoryImage(string dir)
+        {
+            string? file = new DirectoryInfo(dir)
+                .GetFiles()
+                .OrderByDescending(f => f.LastWriteTime)
+                .Select(f => Path.Combine(dir, f.Name))
+                .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
+                .FirstOrDefault();
+
+            if (file != null) return file;
+
+            foreach (string directory in Directory.GetDirectories(dir))
+            {
+                var result = GetFirstDirectoryImage(directory);
+                if (result != null) return result;
+            }
+            
+            return "";
         }
 
         private string GenerateGalleryImage(string[] originalPath, string thumbDir)
