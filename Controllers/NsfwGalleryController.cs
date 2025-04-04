@@ -202,13 +202,29 @@ namespace ChemSite.Controllers
 
             if (file != null) return file;
 
+            string result = "";
+            FileInfo? fileInfo = null;
             foreach (string directory in Directory.GetDirectories(dir))
             {
-                var result = GetFirstDirectoryImage(directory);
-                if (result != null) return result;
+                string path = GetFirstDirectoryImage(directory);
+                FileInfo pathInfo = new FileInfo(path);
+
+                if (fileInfo == null)
+                {
+                    fileInfo = new FileInfo(path);
+                    result = path;
+                    continue;
+                }
+
+                if (fileInfo.LastWriteTime < pathInfo.LastWriteTime)
+                {
+                    fileInfo = pathInfo;
+                    result = path;
+                }
             }
-            
-            return "";
+
+            if (result == null) result = "";
+            return result;
         }
 
         private string GenerateGalleryImage(string[] originalPath, string thumbDir)
