@@ -153,8 +153,11 @@ a {
   text-decoration: none;
 }
 
-.btn-primary {
+.artists img {
+    max-height: 30px;
+}
 
+.btn-primary {
 }
 
 .image-detail {
@@ -277,6 +280,27 @@ img {
 
 .background-item img {
     height: 100%;
+}
+
+.artist a:not([href]), .external-platform a:not([href]) {
+    color: var(--bs-body-color);
+}
+
+.artist span, .external-platform span {
+    line-break: strict;
+    white-space: nowrap;
+}
+
+.breadcrumb a {
+    color: rgba(var(--bs-link-color-rgb),var(--bs-link-opacity,1)) !important;
+}
+
+.artist i, .external-platform i {
+    font-size: 24px;
+    margin-right: 5px;
+    width: 30px;
+    text-align: center;
+    display: block;
 }
 
 .home {

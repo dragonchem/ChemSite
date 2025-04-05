@@ -75,7 +75,9 @@
                                 <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title">
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title">@item.Title</h5>
+                                <h5 class="card-title">
+                                    @item.Title
+                                </h5>
                             </div>
                         </div>
                     </a>
@@ -88,13 +90,33 @@
             <div class="row">
                 @foreach (var item in Model.Images)
                 {
-                    <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery/@Model.Path/@item.Title">
+                    <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@item.Title">
                         <div class="card">
                             <div class="card-img-top overflow-hidden">
                                 <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title">
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title">@item.Title</h5>
+                                @if (item.ImageInfo == null)
+                                {
+                                    <h5 class="card-title">
+                                        @item.Title
+                                    </h5>
+                                }
+                                else
+                                {
+                                    <h5 class="card-title">
+                                        @item.ImageInfo.Name
+                                    </h5>
+                                    <div class="artists">
+                                        @foreach (var artist in item.ImageInfo.ArtistsInfo)
+                                        {
+                                            <div class="artist mt-1">
+                                                <img class="rounded-circle" src="@artist.ProfilePicture" />
+                                                @artist.Name
+                                            </div>
+                                        }
+                                    </div>
+                                }
                             </div>
                         </div>
                     </a>

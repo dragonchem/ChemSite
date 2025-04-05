@@ -16,10 +16,12 @@
         public string Path { get; set; } = "";
         public string ImageUrl { get; set; } = "";
     }
+
     public class GalleryImageContent
     {
         public string Title { get; set; } = "";
         public string Path { get; set; } = "";
         public string ImageUrl { get; set; } = "";
+        public ImageInfo? ImageInfo { get; set; } = null;
     }
 }

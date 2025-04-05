@@ -1,11 +1,22 @@
 ﻿@model GalleryImageViewModel
 @{
     ViewData["Title"] = "Chem's art gallery (NSFW)";
-    if (Model.Path.Split("/").Last() != "")
+    if (Model.Image.ImageInfo != null)
+    {
+        ViewData["Title"] = $"Chem's art gallery (NSFW) - {Model.Image.ImageInfo.Name}";
+    }
+    else if (Model.Path.Split("/").Last() != "")
     {
         ViewData["Title"] = $"Chem's art gallery (NSFW) - {String.Join(" > ", Model.PathParts)}";
     }
-    ViewData["Description"] = $"NSFW Gallery{(Model.PathParts.First() != "" ? " > " : "")}{String.Join(" > ", Model.PathParts)}";
+    if (Model.Image.ImageInfo != null)
+    {
+        ViewData["Description"] = Model.Image.ImageInfo.Description.Replace("\n", " ");
+    }
+    else
+    {
+        ViewData["Description"] = $"NSFW Gallery{(Model.PathParts.First() != "" ? " > " : "")}{String.Join(" > ", Model.PathParts)}";
+    }
     ViewData["Url"] = $"/nsfwgallery/{Model.Path}";
     ViewData["Image"] = $"/art/{Model.Image.ImageUrl}";
     ViewData["Summary"] = "twitter:card";
@@ -41,9 +52,18 @@
                         {
                             fullPath += $"{part}";
                             <li class="breadcrumb-item align-self-center">
-                                <a href="/nsfwgallery/@fullPath">
-                                    @part
-                                </a>
+                                @if (Model.PathParts.Last() == part)
+                                {
+                                    <a>
+                                        @part
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="/gallery/@fullPath">
+                                        @part
+                                    </a>
+                                }
                             </li>
                             fullPath += "/";
                         }
@@ -52,23 +72,152 @@
             </ol>
         </nav>
 
-        @if (Model.Path.Split("/").Last() != "")
-        {
-            <h2>
-                @Model.Path.Split("/").Last()
-            </h2>
-        }
-        else
-        {
-            <h2>
-                Gallery
-            </h2>
-        }
+        <div class="d-flex w-100 flex-column flex-lg-row">
+            <div class="col-xs-12">
+                @if (Model.Image.ImageInfo != null)
+                {
+                    <div class="flex-grow-1 flex-row">
+                        <div class="d-flex">
+                            <h2>
+                                @Model.Image.ImageInfo.Name
+                            </h2>
+                            <span class="ms-3 mt-2 text-secondary align-middle">
+                                Created on
+                                @Model.Image.ImageInfo.CreationDate.ToString("yyyy-MM-dd")
+                            </span>
+                        </div>
 
-        <div class="image-detail d-flex container shadow-lg rounded-3 section p-3 mt-3">
-            <a href="/art/@Model.Image.ImageUrl" target="_blank">
-                <img src="~/art/@Model.Image.ImageUrl" />
-            </a>
+                        <div>
+                            @Html.Raw(Model.Image.ImageInfo.Description.Replace("\n", "<br />"))
+                        </div>
+                    </div>
+                }
+                else if (Model.Path.Split("/").Last() != "")
+                {
+                    <h2>
+                        @Model.Path.Split("/").Last()
+                    </h2>
+                }
+                else
+                {
+                    <h2>
+                        Gallery
+                    </h2>
+                }
+
+                <div class="image-detail d-flex container shadow-lg rounded-3 section p-3 mt-3">
+                    <a href="/art/@Model.Image.ImageUrl" target="_blank">
+                        <img src="~/art/@Model.Image.ImageUrl" />
+                    </a>
+                </div>
+            </div>
+
+            @if (Model.Image.ImageInfo != null)
+            {
+                <div class="artists px-4 mt-3">
+                    Made by:
+                    @foreach (var artist in Model.Image.ImageInfo.ArtistsInfo)
+                    {
+                        <div class="artist mt-2">
+                            <img class="rounded-circle" src="@artist.ProfilePicture" />
+                            <span>@artist.Name</span>
+
+                            @foreach (var platform in artist.PlatformInfo)
+                            {
+                                <div class="ms-4 mt-1 @platform.Icon">
+                                    @if (platform.Link == null || platform.Link == "")
+                                    {
+                                        <a class="d-flex flex-row-reverse artist-link" target="_blank">
+                                            <span class="flex-grow-1">@platform.Name</span>
+                                            @switch (platform.Icon)
+                                            {
+                                                case "bluesky":
+                                                    <i class="fa-brands fa-bluesky"></i>
+                                                    break;
+                                                case "discord":
+                                                    <i class="fa-brands fa-discord"></i>
+                                                    break;
+                                            }
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@platform.Link" class="d-flex flex-row-reverse artist-link" target="_blank">
+                                            <span class="flex-grow-1">@platform.Name</span>
+                                            @switch (platform.Icon)
+                                            {
+                                                case "bluesky":
+                                                    <i class="fa-brands fa-bluesky"></i>
+                                                    break;
+                                                case "discord":
+                                                    <i class="fa-brands fa-discord"></i>
+                                                    break;
+                                            }
+                                        </a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (Model.Image.ImageInfo.AltInfo.Count > 0)
+                    {
+                        <br />
+                        <span>Alts:</span>
+                        @foreach (var alt in Model.Image.ImageInfo.AltInfo)
+                        {
+                            <div class="ms-4 artist">
+                                <a href="/nsfwgallery/@alt.Path" class="d-flex flex-row-reverse artist-link" target="_blank">
+                                    <span class="flex-grow-1">@alt.Name</span>
+                                    <i class="fa-solid fa-image"></i>
+                                </a>
+                            </div>
+                        }
+                    }
+
+                    @if (Model.Image.ImageInfo.ExternalLinks.Length > 0)
+                    {
+                        <br />
+                        <span>External links:</span>
+                        @foreach (var platform in Model.Image.ImageInfo.ExternalLinks)
+                        {
+                            <div class="ms-4 @platform.Icon external-platform">
+                                @if (platform.Link == null || platform.Link == "")
+                                {
+                                    <a class="d-flex flex-row-reverse" target="_blank">
+                                        <span class="flex-grow-1">@platform.Name</span>
+                                        @switch (platform.Icon)
+                                        {
+                                            case "bluesky":
+                                                <i class="fa-brands fa-bluesky"></i>
+                                                break;
+                                            case "discord":
+                                                <i class="fa-brands fa-discord"></i>
+                                                break;
+                                        }
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@platform.Link" class="d-flex flex-row-reverse artist-link" target="_blank">
+                                        <span class="flex-grow-1">@platform.Name</span>
+                                        @switch (platform.Icon)
+                                        {
+                                            case "bluesky":
+                                                <i class="fa-brands fa-bluesky"></i>
+                                                break;
+                                            case "discord":
+                                                <i class="fa-brands fa-discord"></i>
+                                                break;
+                                        }
+                                    </a>
+                                }
+                            </div>
+                        }
+                    }
+
+                </div>
+            }
         </div>
 
     </div>

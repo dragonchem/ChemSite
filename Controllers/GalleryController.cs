@@ -10,6 +10,7 @@ using System.Reflection;
 using ImageMagick;
 using System.Runtime.Versioning;
 using static System.Net.Mime.MediaTypeNames;
+using System.Text.Json;
 
 namespace ChemSite.Controllers
 {
@@ -20,6 +21,7 @@ namespace ChemSite.Controllers
         private readonly string thumbBasePath;
         private readonly string galleryThumbBasePath;
         private readonly string folderThumbBasePath;
+        private readonly string artistsBasePath;
         private static readonly List<string> ImageExtensions = new List<string> { ".JPG", ".JPEG", ".JPE", ".BMP", ".GIF", ".PNG" };
         private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -30,6 +32,7 @@ namespace ChemSite.Controllers
             thumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb");
             galleryThumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb", "gallery");
             folderThumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb", "folder");
+            artistsBasePath = Path.Combine(webHostEnvironment.WebRootPath, "artists");
         }
 
         public IActionResult Index(string path)
@@ -66,7 +69,6 @@ namespace ChemSite.Controllers
             string[] directories = Directory.GetDirectories(Path.Combine(artBasePath, path)).Where(x => !x.Contains("nsfw") && !x.Contains("kinky")).ToArray();
             string[] files = new DirectoryInfo(Path.Combine(artBasePath, path))
                 .GetFiles()
-                .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => Path.Combine(artBasePath, path, f.Name))
                 .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
                 .Where(x => !x.Contains("nsfw") && !x.Contains("kinky"))
@@ -91,13 +93,40 @@ namespace ChemSite.Controllers
                     GenerateThumbnailImage(file, thumb, Path.GetDirectoryName(thumb)!);
                 }
 
+                ImageInfo? imageInfo = null;
+                string imageInfoPath = Path.ChangeExtension(file, "json");
+                if (System.IO.File.Exists(imageInfoPath))
+                {
+                    string fileData = System.IO.File.ReadAllText(imageInfoPath);
+                    imageInfo = JsonSerializer.Deserialize<ImageInfo>(fileData);
+
+                    if (imageInfo == null) continue;
+
+                    foreach (string artist in imageInfo.Artists)
+                    {
+                        string artistPath = Path.Combine(artistsBasePath, artist + ".json");
+                        if (System.IO.File.Exists(artistPath))
+                        {
+                            string artistData = System.IO.File.ReadAllText(artistPath);
+                            ArtistInfo? artistInfo = JsonSerializer.Deserialize<ArtistInfo>(artistData);
+                            if (artistInfo == null) continue;
+
+                            artistInfo.PlatformInfo = artistInfo.PlatformInfo.Where(x => x.Nsfw == false).ToArray();
+                            imageInfo.ArtistsInfo.Add(artistInfo);
+                        }
+                    }
+                }
+
                 folderViewModel.Images.Add(new GalleryImageContent
                 {
                     Title = file.Split('\\').Last(),
                     ImageUrl = RemoveFilePath(thumb),
-                    Path = RemoveFilePath(file)
+                    Path = RemoveFilePath(file),
+                    ImageInfo = imageInfo
                 });
             }
+
+            folderViewModel.Images = folderViewModel.Images.OrderByDescending(x => x.ImageInfo?.CreationDate).ToList();
 
             var amount = files.Length;
             if (files.Length >= 9) amount = 9;
@@ -171,7 +200,6 @@ namespace ChemSite.Controllers
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => Path.Combine(artBasePath, dir, f.Name))
                 .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
-                .Where(x => !x.Contains("nsfw") && !x.Contains("kinky"))
                 .ToArray();
             List<string> filteredFiles = files.Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper())).ToList();
             if (filteredFiles.Count > 0) return filteredFiles[0];
@@ -207,13 +235,29 @@ namespace ChemSite.Controllers
 
             if (file != null) return file;
 
+            string result = "";
+            FileInfo? fileInfo = null;
             foreach (string directory in Directory.GetDirectories(dir))
             {
-                var result = GetFirstDirectoryImage(directory);
-                if (result != null) return result;
+                string path = GetFirstDirectoryImage(directory);
+                FileInfo pathInfo = new FileInfo(path);
+
+                if (fileInfo == null)
+                {
+                    fileInfo = new FileInfo(path);
+                    result = path;
+                    continue;
+                }
+
+                if (fileInfo.LastWriteTime < pathInfo.LastWriteTime)
+                {
+                    fileInfo = pathInfo;
+                    result = path;
+                }
             }
 
-            return "";
+            if (result == null) result = "";
+            return result;
         }
 
         private string GenerateGalleryImage(string[] originalPath, string thumbDir)
@@ -426,12 +470,60 @@ namespace ChemSite.Controllers
                 GenerateThumbnailImage(file, thumb, Path.GetDirectoryName(thumb)!);
             }
 
+            ImageInfo? imageInfo = null;
+            string imageInfoPath = Path.ChangeExtension(file, "json");
+            if (System.IO.File.Exists(imageInfoPath))
+            {
+                string fileData = System.IO.File.ReadAllText(imageInfoPath);
+                imageInfo = JsonSerializer.Deserialize<ImageInfo>(fileData);
+
+                if (imageInfo != null)
+                {
+                    imageInfo.ExternalLinks = imageInfo.ExternalLinks.Where(x => x.Nsfw == false).ToArray();
+
+                    foreach (string artist in imageInfo.Artists)
+                    {
+                        string artistPath = Path.Combine(artistsBasePath, artist + ".json");
+                        if (System.IO.File.Exists(artistPath))
+                        {
+                            string artistData = System.IO.File.ReadAllText(artistPath);
+                            ArtistInfo? artistInfo = JsonSerializer.Deserialize<ArtistInfo>(artistData);
+                            if (artistInfo == null) continue;
+
+                            artistInfo.PlatformInfo = artistInfo.PlatformInfo.Where(x => x.Nsfw == false).ToArray();
+
+                            imageInfo.ArtistsInfo.Add(artistInfo);
+                        }
+                    }
+
+                    foreach (string altPath in imageInfo.AltPaths)
+                    {
+                        string filePath = Path.Combine(artBasePath, Path.ChangeExtension(altPath, "json"));
+                        if (System.IO.File.Exists(filePath) && filePath.Contains("nsfw") == false && filePath.Contains("kinky") == false)
+                        {
+                            string altData = System.IO.File.ReadAllText(filePath);
+                            ImageInfo? altInfo = JsonSerializer.Deserialize<ImageInfo>(altData);
+
+                            if (altInfo == null) continue;
+
+                            imageInfo.AltInfo.Add(altInfo);
+                        }
+                    }
+                }
+            }
+
             folderViewModel.Image = new GalleryImageContent
             {
                 Title = file.Split('\\').Last(),
                 ImageUrl = RemoveFilePath(thumb),
-                Path = RemoveFilePath(file)
+                Path = RemoveFilePath(file),
+                ImageInfo = imageInfo
             };
+
+            if (folderViewModel.Image.ImageInfo != null)
+            {
+                folderViewModel.PathParts[folderViewModel.PathParts.Length - 1] = folderViewModel.Image.ImageInfo.Name;
+            }
 
             return View("Image", folderViewModel);
         }
