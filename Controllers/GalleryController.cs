@@ -64,14 +64,14 @@ namespace ChemSite.Controllers
 
             if (!Directory.Exists(fullPath)) return NotFound();
 
-            if (path.Contains("nsfw") || path.Contains("kinky")) return NotFound();
+            if (path.ToLower().Contains("nsfw") || path.ToLower().Contains("kinky")) return NotFound();
 
-            string[] directories = Directory.GetDirectories(Path.Combine(artBasePath, path)).Where(x => !x.Contains("nsfw") && !x.Contains("kinky")).ToArray();
+            string[] directories = Directory.GetDirectories(Path.Combine(artBasePath, path)).Where(x => !x.ToLower().Contains("nsfw") && !x.ToLower().Contains("kinky")).ToArray();
             string[] files = new DirectoryInfo(Path.Combine(artBasePath, path))
                 .GetFiles()
                 .Select(f => Path.Combine(artBasePath, path, f.Name))
                 .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
-                .Where(x => !x.Contains("nsfw") && !x.Contains("kinky"))
+                .Where(x => !x.ToLower().Contains("nsfw") && !x.ToLower().Contains("kinky"))
                 .ToArray();
 
             foreach (var directory in directories)
@@ -136,7 +136,7 @@ namespace ChemSite.Controllers
             {
                 foreach (var directory in directories)
                 {
-                    if (directory.Contains("nsfw") && !path.Contains("nsfw")) continue;
+                    if (directory.ToLower().Contains("nsfw") && !path.ToLower().Contains("nsfw")) continue;
                     var images = FindDirectoryImages(directory, 0);
 
                     foreach (var image in images)
@@ -168,7 +168,7 @@ namespace ChemSite.Controllers
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => Path.Combine(artBasePath, dir, f.Name))
                 .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
-                .Where(x => !x.Contains("nsfw") && !x.Contains("kinky"))
+                .Where(x => !x.ToLower().Contains("nsfw") && !x.ToLower().Contains("kinky"))
                 .ToArray();
             List<string> filteredFiles = files.Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper())).ToList();
             foreach (string file in filteredFiles)
@@ -181,7 +181,7 @@ namespace ChemSite.Controllers
             string[] dirs = Directory.GetDirectories(dir);
             foreach (string directory in dirs)
             {
-                if (directory.Contains("nsfw") && !dir.Contains("nsfw")) continue;
+                if (directory.ToLower().Contains("nsfw") && !dir.ToLower().Contains("nsfw")) continue;
                 images = FindDirectoryImages(directory, depth, images);
 
                 if (images.Count >= 9) return images;
@@ -286,7 +286,7 @@ namespace ChemSite.Controllers
                     }, Gravity.Center);
 
                     string? dir = Path.GetDirectoryName(originalPath[i]);
-                    if (dir != null && (dir.EndsWith("nsfw") || dir.EndsWith("kinky"))) image.Blur(25, 25);
+                    if (dir != null && (dir.ToLower().EndsWith("nsfw") || dir.ToLower().EndsWith("kinky"))) image.Blur(25, 25);
                     collection.Add(image);
                 }
 
@@ -360,7 +360,7 @@ namespace ChemSite.Controllers
                     }, Gravity.Center);
 
                     string? dir = Path.GetDirectoryName(originalPath[i]);
-                    if (dir != null && (dir.EndsWith("nsfw") || dir.EndsWith("kinky"))) image.Blur(25, 25);
+                    if (dir != null && (dir.ToLower().EndsWith("nsfw") || dir.ToLower().EndsWith("kinky"))) image.Blur(25, 25);
                     collection.Add(image);
                 }
 
@@ -499,7 +499,7 @@ namespace ChemSite.Controllers
                     foreach (string altPath in imageInfo.AltPaths)
                     {
                         string filePath = Path.Combine(artBasePath, Path.ChangeExtension(altPath, "json"));
-                        if (System.IO.File.Exists(filePath) && filePath.Contains("nsfw") == false && filePath.Contains("kinky") == false)
+                        if (System.IO.File.Exists(filePath) && filePath.ToLower().Contains("nsfw") == false && filePath.ToLower().Contains("kinky") == false)
                         {
                             string altData = System.IO.File.ReadAllText(filePath);
                             ImageInfo? altInfo = JsonSerializer.Deserialize<ImageInfo>(altData);

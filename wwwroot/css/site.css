@@ -178,9 +178,11 @@ a {
 }
 
 img[alt="nsfw"],
-img[alt="kinky"] {
-  filter: blur(25px);
-  overflow: hidden;
+img[alt="kinky"],
+img[alt="NSFW"],
+img[alt="Kinky"] {
+    filter: blur(25px);
+    overflow: hidden;
 }
 
 .container {
@@ -286,9 +288,8 @@ img {
     color: var(--bs-body-color);
 }
 
-.artist span, .external-platform span {
-    line-break: strict;
-    white-space: nowrap;
+.artist-link img {
+    max-width: 24px;
 }
 
 .breadcrumb a {

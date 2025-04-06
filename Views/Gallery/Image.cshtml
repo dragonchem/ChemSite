@@ -65,7 +65,7 @@
         </nav>
 
         <div class="d-flex w-100 flex-column flex-lg-row">
-            <div class="col-xs-12">
+            <div class="col-xs-12 flex-grow-1">
                 @if (Model.Image.ImageInfo != null)
                 {
                     <div class="flex-grow-1 flex-row">
@@ -97,8 +97,8 @@
                     </h2>
                 }
 
-                <div class="image-detail d-flex container shadow-lg rounded-3 section p-3 mt-3">
-                    <a href="/art/@Model.Image.ImageUrl" target="_blank">
+                <div class="image-detail d-flex container shadow-lg rounded-3 section p-3 mt-3 flex-grow-1">
+                    <a href="/art/@Model.Image.ImageUrl" class="w-100" target="_blank">
                         <img src="~/art/@Model.Image.ImageUrl" />
                     </a>
                 </div>
@@ -111,8 +111,10 @@
                     @foreach (var artist in Model.Image.ImageInfo.ArtistsInfo)
                     {
                         <div class="artist mt-2">
-                            <img class="rounded-circle" src="@artist.ProfilePicture" />
-                            <span>@artist.Name</span>
+                            <div class="d-flex flex-row">
+                                <img class="rounded-circle me-1" src="@artist.ProfilePicture" />
+                                <span class="flex-row-1 mt-1">@artist.Name</span>
+                            </div>
 
                             @foreach (var platform in artist.PlatformInfo)
                             {
@@ -129,6 +131,30 @@
                                                 case "discord":
                                                     <i class="fa-brands fa-discord"></i>
                                                     break;
+                                                case "twitter":
+                                                    <i class="fa-brands fa-twitter"></i>
+                                                    break;
+                                                case "fiverr":
+                                                    <img src="/fiverr-icon.svg" class="me-1" />
+                                                    break;
+                                                case "telegram":
+                                                    <i class="fa-brands fa-telegram"></i>
+                                                    break;
+                                                case "deviantart":
+                                                    <i class="fa-brands fa-deviantart"></i>
+                                                    break;
+                                                case "instagram":
+                                                    <i class="fa-brands fa-instagram"></i>
+                                                    break;
+                                                case "reddit":
+                                                    <i class="fa-brands fa-reddit"></i>
+                                                    break;
+                                                case "website":
+                                                    <i class="fa-solid fa-globe"></i>
+                                                    break;
+                                                case "itaku":
+                                                    <img src="/itaku.png" class="me-1" />
+                                                    break;
                                             }
                                         </a>
                                     }
@@ -143,6 +169,30 @@
                                                     break;
                                                 case "discord":
                                                     <i class="fa-brands fa-discord"></i>
+                                                    break;
+                                                case "twitter":
+                                                    <i class="fa-brands fa-twitter"></i>
+                                                    break;
+                                                case "fiverr":
+                                                    <img src="/fiverr-icon.svg" class="me-1" />
+                                                    break;
+                                                case "telegram":
+                                                    <i class="fa-brands fa-telegram"></i>
+                                                    break;
+                                                case "deviantart":
+                                                    <i class="fa-brands fa-deviantart"></i>
+                                                    break;
+                                                case "instagram":
+                                                    <i class="fa-brands fa-instagram"></i>
+                                                    break;
+                                                case "reddit":
+                                                    <i class="fa-brands fa-reddit"></i>
+                                                    break;
+                                                case "website":
+                                                    <i class="fa-solid fa-globe"></i>
+                                                    break;
+                                                case "itaku":
+                                                    <img src="/itaku.png" class="me-1" />
                                                     break;
                                             }
                                         </a>
@@ -186,6 +236,30 @@
                                             case "discord":
                                                 <i class="fa-brands fa-discord"></i>
                                                 break;
+                                            case "twitter":
+                                                <i class="fa-brands fa-twitter"></i>
+                                                break;
+                                            case "fiverr":
+                                                <img src="/fiverr-icon.svg" class="me-1" />
+                                                break;
+                                            case "telegram":
+                                                <i class="fa-brands fa-telegram"></i>
+                                                break;
+                                            case "deviantart":
+                                                <i class="fa-brands fa-deviantart"></i>
+                                                break;
+                                            case "instagram":
+                                                <i class="fa-brands fa-instagram"></i>
+                                                break;
+                                            case "reddit":
+                                                <i class="fa-brands fa-reddit"></i>
+                                                break;
+                                            case "website":
+                                                <i class="fa-solid fa-globe"></i>
+                                                break;
+                                            case "itaku":
+                                                <img src="/itaku.png" class="me-1" />
+                                                break;
                                         }
                                     </a>
                                 }
@@ -200,6 +274,30 @@
                                                 break;
                                             case "discord":
                                                 <i class="fa-brands fa-discord"></i>
+                                                break;
+                                            case "twitter":
+                                                <i class="fa-brands fa-twitter"></i>
+                                                break;
+                                            case "fiverr":
+                                                <img src="/fiverr-icon.svg" class="me-1" />
+                                                break;
+                                            case "telegram":
+                                                <i class="fa-brands fa-telegram"></i>
+                                                break;
+                                            case "deviantart":
+                                                <i class="fa-brands fa-deviantart"></i>
+                                                break;
+                                            case "instagram":
+                                                <i class="fa-brands fa-instagram"></i>
+                                                break;
+                                            case "reddit":
+                                                <i class="fa-brands fa-reddit"></i>
+                                                break;
+                                            case "website":
+                                                <i class="fa-solid fa-globe"></i>
+                                                break;
+                                            case "itaku":
+                                                <img src="/itaku.png" class="me-1" />
                                                 break;
                                         }
                                     </a>

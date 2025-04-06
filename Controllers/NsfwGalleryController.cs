@@ -132,7 +132,7 @@ namespace ChemSite.Controllers
             {
                 foreach (var directory in directories)
                 {
-                    if (directory.Contains("nsfw") && !path.Contains("nsfw")) continue;
+                    if (directory.ToLower().Contains("nsfw") && !path.ToLower().Contains("nsfw")) continue;
                     var images = FindDirectoryImages(directory, 0);
 
                     foreach (var image in images)
@@ -176,7 +176,7 @@ namespace ChemSite.Controllers
             string[] dirs = Directory.GetDirectories(dir);
             foreach (string directory in dirs)
             {
-                if (directory.Contains("nsfw") && !dir.Contains("nsfw")) continue;
+                if (directory.ToLower().Contains("nsfw") && !dir.ToLower().Contains("nsfw")) continue;
                 images = FindDirectoryImages(directory, depth, images);
 
                 if (images.Count >= 9) return images;
@@ -281,7 +281,7 @@ namespace ChemSite.Controllers
                     }, Gravity.Center);
 
                     string? dir = Path.GetDirectoryName(originalPath[i]);
-                    if (dir != null && (dir.EndsWith("nsfw") || dir.EndsWith("kinky"))) image.Blur(25, 25);
+                    if (dir != null && (dir.ToLower().EndsWith("nsfw") || dir.ToLower().EndsWith("kinky"))) image.Blur(25, 25);
                     collection.Add(image);
                 }
 
@@ -355,7 +355,7 @@ namespace ChemSite.Controllers
                     }, Gravity.Center);
 
                     string? dir = Path.GetDirectoryName(originalPath[i]);
-                    if (dir != null && (dir.EndsWith("nsfw") || dir.EndsWith("kinky"))) image.Blur(25, 25);
+                    if (dir != null && (dir.ToLower().EndsWith("nsfw") || dir.ToLower().EndsWith("kinky"))) image.Blur(25, 25);
                     collection.Add(image);
                 }
 
