@@ -3,11 +3,11 @@
     ViewData["Title"] = "Chem's art gallery";
     if (Model.Image.ImageInfo != null)
     {
-        ViewData["Title"] = $"Chem's art gallery (NSFW) - {Model.Image.ImageInfo.Name}";
+        ViewData["Title"] = $"Chem's art gallery - {Model.Image.ImageInfo.Name}";
     }
     else if (Model.Path.Split("/").Last() != "")
     {
-        ViewData["Title"] = $"Chem's art gallery (NSFW) - {String.Join(" > ", Model.PathParts)}";
+        ViewData["Title"] = $"Chem's art gallery - {String.Join(" > ", Model.PathParts)}";
     }
     if (Model.Image.ImageInfo != null)
     {
