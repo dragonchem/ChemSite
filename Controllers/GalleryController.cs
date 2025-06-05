@@ -38,10 +38,9 @@ namespace ChemSite.Controllers
         public IActionResult Index(string path)
         {
             if (path == null) path = "";
-            if (path.StartsWith("/"))
-            {
-                path = path.Substring(1);
-            }
+
+            if (path.StartsWith("/")) path = path.Substring(1);
+            if (path.EndsWith("/")) path = path.Substring(0, path.Length - 1);
 
             if (IsFile(path))
             {
