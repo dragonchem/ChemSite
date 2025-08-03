@@ -23,5 +23,6 @@
         public string Path { get; set; } = "";
         public string ImageUrl { get; set; } = "";
         public ImageInfo? ImageInfo { get; set; } = null;
+        public bool Image { get; set; } = true;
     }
 }

@@ -104,10 +104,16 @@
                 <div class="row">
                     @foreach (var item in Model.Images)
                     {
-                        <a class="col-lg-2 col-md-3 col-6 mb-3" href="/nsfwgallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@item.Title">
+                        <a class="col-lg-2 col-md-3 col-6 mb-3" href="/nsfwgallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@(item.Image ? item.Title : item.Title.Substring(0, item.Title.Length - 4))">
                             <div class="card">
                                 <div class="card-img-top overflow-hidden">
                                     <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title">
+                                    @if (!item.Image)
+                                    {
+                                        <div class="video-icon">
+                                            <i class="fas fa-play"></i>
+                                        </div>
+                                    }
                                 </div>
                                 <div class="card-body">
                                     @if (item.ImageInfo == null)

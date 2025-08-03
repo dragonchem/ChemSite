@@ -106,9 +106,18 @@
                 }
 
                 <div class="image-detail d-flex container shadow-lg rounded-3 section p-3 mt-3">
-                    <a href="/art/@Model.Image.ImageUrl" class="w-100" target="_blank">
-                        <img src="~/art/@Model.Image.ImageUrl" />
-                    </a>
+                    @if (Model.Image.Image)
+                    {
+                        <a href="/art/@Model.Image.ImageUrl" class="w-100" target="_blank">
+                            <img src="~/art/@Model.Image.ImageUrl" />
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="w-100">
+                            <video loop controls autoplay src="~/art/@Model.Image.ImageUrl"></video>
+                        </a>
+                    }
                 </div>
             </div>
 
@@ -163,6 +172,9 @@
                                                 case "itaku":
                                                     <img src="/itaku.png" class="me-1" />
                                                     break;
+                                                case "furaffinity":
+                                                    <img src="/fa.png" class="me-1" />
+                                                    break;
                                             }
                                         </a>
                                     }
@@ -201,6 +213,9 @@
                                                     break;
                                                 case "itaku":
                                                     <img src="/itaku.png" class="me-1" />
+                                                    break;
+                                                case "furaffinity":
+                                                    <img src="/fa.png" class="me-1" />
                                                     break;
                                             }
                                         </a>
@@ -268,6 +283,9 @@
                                             case "itaku":
                                                 <img src="/itaku.png" class="me-1" />
                                                 break;
+                                            case "furaffinity":
+                                                <img src="/fa.png" class="me-1" />
+                                                break;
                                         }
                                     </a>
                                 }
@@ -306,6 +324,9 @@
                                                 break;
                                             case "itaku":
                                                 <img src="/itaku.png" class="me-1" />
+                                                break;
+                                            case "furaffinity":
+                                                <img src="/fa.png" class="me-1" />
                                                 break;
                                         }
                                     </a>

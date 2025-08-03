@@ -1,9 +1,19 @@
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -30,6 +40,12 @@ app.MapControllerRoute(
     name: "nsfwgallery",
     pattern: "NsfwGallery/{*path}",
     defaults: new { controller = "NsfwGallery", action = "Index" }
+);
+
+app.MapControllerRoute(
+    name: "oembed",
+    pattern: "oembed/{*path}",
+    defaults: new { controller = "OEmbed", action = "Index" }
 );
 
 app.MapControllerRoute(

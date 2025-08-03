@@ -44,4 +44,7 @@ msbuild.wrn
 
 wwwroot/art
 wwwroot/thumb
+wwwroot/ffmpeg
 /wwwroot/artists
+
+logs

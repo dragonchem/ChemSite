@@ -11,6 +11,8 @@ using ImageMagick;
 using System.Runtime.Versioning;
 using static System.Net.Mime.MediaTypeNames;
 using System.Text.Json;
+using FFMpegCore;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace ChemSite.Controllers
 {
@@ -19,10 +21,12 @@ namespace ChemSite.Controllers
     {
         private readonly string artBasePath;
         private readonly string thumbBasePath;
+        private readonly string ffmpegBasePath;
         private readonly string galleryThumbBasePath;
         private readonly string folderThumbBasePath;
         private readonly string artistsBasePath;
         private static readonly List<string> ImageExtensions = new List<string> { ".JPG", ".JPEG", ".JPE", ".BMP", ".GIF", ".PNG" };
+        private static readonly List<string> VideoExtensions = new List<string> { ".MP4", ".MOV", ".WEBM" };
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         public GalleryController(IWebHostEnvironment webHostEnvironment)
@@ -30,6 +34,7 @@ namespace ChemSite.Controllers
             _webHostEnvironment = webHostEnvironment;
             artBasePath = Path.Combine(webHostEnvironment.WebRootPath, "art");
             thumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb");
+            ffmpegBasePath = Path.Combine(webHostEnvironment.WebRootPath, "ffmpeg");
             galleryThumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb", "gallery");
             folderThumbBasePath = Path.Combine(webHostEnvironment.WebRootPath, "thumb", "folder");
             artistsBasePath = Path.Combine(webHostEnvironment.WebRootPath, "artists");
@@ -68,10 +73,37 @@ namespace ChemSite.Controllers
             string[] directories = Directory.GetDirectories(Path.Combine(artBasePath, path)).Where(x => !x.ToLower().Contains("nsfw") && !x.ToLower().Contains("kinky")).ToArray();
             string[] files = new DirectoryInfo(Path.Combine(artBasePath, path))
                 .GetFiles()
+                .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => Path.Combine(artBasePath, path, f.Name))
-                .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
+                .Where(x =>
+                    ImageExtensions.Contains(Path.GetExtension(x).ToUpper()) ||
+                    VideoExtensions.Contains(Path.GetExtension(x).ToUpper())
+                )
                 .Where(x => !x.ToLower().Contains("nsfw") && !x.ToLower().Contains("kinky"))
                 .ToArray();
+
+            var videoFiles = files.Where(x => VideoExtensions.Contains(Path.GetExtension(x).ToUpper())).ToList();
+            for (int i = 0; i < videoFiles.Count; i++)
+            {
+                string file = videoFiles[i];
+
+                string thumb = file.Replace(artBasePath, thumbBasePath) + ".png";
+                string ffmpegPath = file.Replace(artBasePath, ffmpegBasePath) + ".png";
+
+                if (!System.IO.File.Exists(ffmpegPath))
+                {
+                    GenerateThumbnailVideo(file, ffmpegPath, Path.GetDirectoryName(ffmpegPath)!);
+                }
+
+                videoFiles[i] = ffmpegPath;
+                var index = files.ToList().FindIndex(x => x == file);
+                files[index] = ffmpegPath;
+
+                if (!System.IO.File.Exists(thumb))
+                {
+                    GenerateThumbnailImage(ffmpegPath, thumb, Path.GetDirectoryName(thumb)!);
+                }
+            }
 
             foreach (var directory in directories)
             {
@@ -121,7 +153,8 @@ namespace ChemSite.Controllers
                     Title = file.Split('\\').Last(),
                     ImageUrl = RemoveFilePath(thumb),
                     Path = RemoveFilePath(file),
-                    ImageInfo = imageInfo
+                    ImageInfo = imageInfo,
+                    Image = VideoExtensions.FindIndex(x => file.ToUpper().Contains(x)) == -1
                 });
             }
 
@@ -152,7 +185,7 @@ namespace ChemSite.Controllers
             var galleryfile = GetFirstDirectoryImage(Path.Combine(artBasePath, path));
             string relativeDir = path.Replace(artBasePath, "");
             if (relativeDir.StartsWith("\\")) relativeDir = relativeDir.Substring(1);
-            folderViewModel.ImageUrl = GenerateGalleryImage(galleryFiles.ToArray(), Path.Combine(galleryThumbBasePath, relativeDir, Path.GetFileName(galleryfile)));
+            folderViewModel.ImageUrl = GenerateGalleryImage(galleryFiles.Take(9).ToArray(), Path.Combine(galleryThumbBasePath, relativeDir, Path.GetFileName(galleryfile)));
 
             return View("Folder", folderViewModel);
         }
@@ -166,11 +199,13 @@ namespace ChemSite.Controllers
                 .GetFiles()
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => Path.Combine(artBasePath, dir, f.Name))
-                .Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper()))
+                .Where(x =>
+                    ImageExtensions.Contains(Path.GetExtension(x).ToUpper()) ||
+                    VideoExtensions.Contains(Path.GetExtension(x).ToUpper())
+                )
                 .Where(x => !x.ToLower().Contains("nsfw") && !x.ToLower().Contains("kinky"))
                 .ToArray();
-            List<string> filteredFiles = files.Where(x => ImageExtensions.Contains(Path.GetExtension(x).ToUpper())).ToList();
-            foreach (string file in filteredFiles)
+            foreach (string file in files)
             {
                 images.Add(file);
 
@@ -407,6 +442,17 @@ namespace ChemSite.Controllers
             }
         }
 
+        private void GenerateThumbnailVideo(string originalPath, string thumbPath, string thumbDir)
+        {
+            Directory.CreateDirectory(thumbDir);
+
+            var mediaInfo = FFProbe.Analyse(originalPath);
+
+            if (mediaInfo.PrimaryVideoStream == null) return;
+
+            FFMpeg.Snapshot(originalPath, thumbPath, new Size(mediaInfo.PrimaryVideoStream.Width, mediaInfo.PrimaryVideoStream.Height), mediaInfo.Duration / 2);
+        }
+
         private void GenerateThumbnailImage(string originalPath, string thumbPath, string thumbDir)
         {
             Directory.CreateDirectory(thumbDir);
@@ -441,7 +487,7 @@ namespace ChemSite.Controllers
 
         private string RemoveFilePath(string path)
         {
-            string filtered = path.Replace(artBasePath, "").Replace(thumbBasePath, "");
+            string filtered = path.Replace(artBasePath, "").Replace(thumbBasePath, "").Replace(ffmpegBasePath, "");
             if (filtered.StartsWith("\\"))
             {
                 filtered = filtered.Substring(1);
@@ -464,7 +510,7 @@ namespace ChemSite.Controllers
 
             string thumb = file.Replace(artBasePath, thumbBasePath);
 
-            if (!System.IO.File.Exists(thumb))
+            if (!System.IO.File.Exists(thumb) && VideoExtensions.FindIndex(x => file.ToUpper().Contains(x)) == -1)
             {
                 GenerateThumbnailImage(file, thumb, Path.GetDirectoryName(thumb)!);
             }
@@ -478,8 +524,6 @@ namespace ChemSite.Controllers
 
                 if (imageInfo != null)
                 {
-                    imageInfo.ExternalLinks = imageInfo.ExternalLinks.Where(x => x.Nsfw == false).ToArray();
-
                     foreach (string artist in imageInfo.Artists)
                     {
                         string artistPath = Path.Combine(artistsBasePath, artist + ".json");
@@ -488,8 +532,6 @@ namespace ChemSite.Controllers
                             string artistData = System.IO.File.ReadAllText(artistPath);
                             ArtistInfo? artistInfo = JsonSerializer.Deserialize<ArtistInfo>(artistData);
                             if (artistInfo == null) continue;
-
-                            artistInfo.PlatformInfo = artistInfo.PlatformInfo.Where(x => x.Nsfw == false).ToArray();
 
                             imageInfo.ArtistsInfo.Add(artistInfo);
                         }
@@ -504,7 +546,6 @@ namespace ChemSite.Controllers
                             ImageInfo? altInfo = JsonSerializer.Deserialize<ImageInfo>(altData);
 
                             if (altInfo == null) continue;
-
                             imageInfo.AltInfo.Add(altInfo);
                         }
                     }
@@ -516,7 +557,8 @@ namespace ChemSite.Controllers
                 Title = file.Split('\\').Last(),
                 ImageUrl = RemoveFilePath(thumb),
                 Path = RemoveFilePath(file),
-                ImageInfo = imageInfo
+                ImageInfo = imageInfo,
+                Image = VideoExtensions.FindIndex(x => file.ToUpper().Contains(x)) == -1
             };
 
             if (folderViewModel.Image.ImageInfo != null)
