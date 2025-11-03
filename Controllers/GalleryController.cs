@@ -126,6 +126,8 @@ namespace ChemSite.Controllers
 
                 ImageInfo? imageInfo = null;
                 string imageInfoPath = Path.ChangeExtension(file, "json");
+                if (imageInfoPath.Contains("ffmpeg")) imageInfoPath = imageInfoPath.Replace("ffmpeg", "art");
+
                 if (System.IO.File.Exists(imageInfoPath))
                 {
                     string fileData = System.IO.File.ReadAllText(imageInfoPath);
@@ -154,7 +156,7 @@ namespace ChemSite.Controllers
                     ImageUrl = RemoveFilePath(thumb),
                     Path = RemoveFilePath(file),
                     ImageInfo = imageInfo,
-                    Image = VideoExtensions.FindIndex(x => file.ToUpper().Contains(x)) == -1
+                    Image = VideoExtensions.FindIndex(x => file.ToUpper().Contains(x)) == -1 || imageInfo != null
                 });
             }
 

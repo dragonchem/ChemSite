@@ -108,7 +108,7 @@
                             <div class="card">
                                 <div class="card-img-top overflow-hidden">
                                     <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title">
-                                    @if (!item.Image)
+                                    @if (!item.Image || item.Title.EndsWith("mp4") || item.Title.EndsWith("mov"))
                                     {
                                         <div class="video-icon">
                                             <i class="fas fa-play"></i>

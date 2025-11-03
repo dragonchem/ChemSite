@@ -43,6 +43,8 @@
         <meta property="twitter:url" content="@ViewData["Url"]" />
         <meta property="twitter:title" content="@ViewData["Title"]" />
         <meta property="twitter:description" content="@ViewData["Description"]" />
+
+
         @if (!isVideo)
         {
             <meta content="@ViewData["Image"]" property="twitter:image" />
@@ -54,7 +56,6 @@
             <meta content="@ViewData["Image"]" property="twitter:video" />
         }
     }
-
     <meta content="#D5810E" data-react-helmet="true" name="theme-color" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />

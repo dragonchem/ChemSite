@@ -12,7 +12,7 @@
     "https": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "disclaimer?url=nsfwgallery/Chem/NSFW/kinky",
+      "launchUrl": "nsfwgallery/Chem/nsfw/kinky",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
