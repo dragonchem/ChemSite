@@ -36,7 +36,7 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="/">
-                        <img src="~/art/Chem/emotes/chemHi.png" />
+                        <img src="~/art/Chem/emotes/chemHi.png" loading="lazy" />
                     </a>
                 </li>
                 <li class="breadcrumb-item">
@@ -109,7 +109,7 @@
                     @if (Model.Image.Image)
                     {
                         <a href="/art/@Model.Image.ImageUrl" class="w-100" target="_blank">
-                            <img src="~/art/@Model.Image.ImageUrl" />
+                            <img src="~/art/@Model.Image.ImageUrl" loading="lazy" />
                         </a>
                     }
                     else
@@ -129,7 +129,7 @@
                     {
                         <div class="artist mt-2">
                             <div class="d-flex flex-row">
-                                <img class="rounded-circle me-1" src="@artist.ProfilePicture" />
+                                <img class="rounded-circle me-1" src="@artist.ProfilePicture" loading="lazy" />
                                 <span class="flex-row-1 mt-1">@artist.Name</span>
                             </div>
 

@@ -74,7 +74,7 @@
                         <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@item.Title">
                             <div class="card">
                                 <div class="card-img-top overflow-hidden">
-                                    <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title">
+                                    <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title" loading="lazy">
                                 </div>
                                 <div class="card-body">
                                     <h5 class="card-title">
@@ -98,7 +98,7 @@
                         <a class="col-lg-2 col-md-3 col-6 mb-3" href="/gallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@(item.Image ? item.Title : item.Title.Substring(0, item.Title.Length - 4))">
                             <div class="card">
                                 <div class="card-img-top overflow-hidden">
-                                    <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title">
+                                    <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title" loading="lazy">
                                     @if (!item.Image || item.Title.EndsWith("mp4") || item.Title.EndsWith("mov"))
                                     {
                                         <div class="video-icon">
@@ -122,7 +122,7 @@
                                             @foreach (var artist in item.ImageInfo.ArtistsInfo)
                                             {
                                                 <div class="artist mt-1 d-flex flex-row">
-                                                    <img class="rounded-circle me-1" src="@artist.ProfilePicture" />
+                                                    <img class="rounded-circle me-1" src="@artist.ProfilePicture" loading="lazy" />
                                                     <span class="flex-grow-1 w-75 mt-1">@artist.Name</span>
                                                 </div>
                                             }
