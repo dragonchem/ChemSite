@@ -20,6 +20,7 @@
     ViewData["Url"] = $"/nsfwgallery/{Model.Path}";
     ViewData["Image"] = $"/art/{Model.Image.ImageUrl}";
     ViewData["Summary"] = "twitter:card";
+    ViewData["SearchUrl"] = "/nsfwgallery/search";
 }
 
 <script>
@@ -32,8 +33,20 @@
 
 <div class="flex min-vh-100 align-content-center">
     <div class="container p-3 align-middle max-vh-95 overflow-y-scroll rounded-4 shadow-lg">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+        @if (Model.IsAdmin)
+        {
+            <div class="admin-bar d-flex flex-wrap gap-2 mb-3 p-2 rounded-3">
+                <span class="text-secondary me-2 align-self-center">Admin:</span>
+                <a href="/nsfwgallery/admin/edit/@Model.Image.Path" class="btn btn-sm btn-outline-warning"><i class="fas fa-pencil me-1"></i>Edit</a>
+                <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete()"><i class="fas fa-trash me-1"></i>Delete</button>
+                <a href="/nsfwgallery/admin/artists" class="btn btn-sm btn-outline-secondary"><i class="fas fa-user me-1"></i>Artists</a>
+                <a href="/nsfwgallery/admin/tags" class="btn btn-sm btn-outline-secondary"><i class="fas fa-tag me-1"></i>Tags</a>
+            </div>
+            <form id="delete-form" method="post" action="/nsfwgallery/admin/delete/@Model.Image.Path" class="d-none"></form>
+        }
+        <div class="d-flex align-items-center justify-content-between">
+        <nav aria-label="breadcrumb" class="flex-grow-1">
+            <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item">
                     <a href="/">
                         <img src="~/art/Chem/emotes/chemHi.png" loading="lazy" />
@@ -71,6 +84,8 @@
                 }
             </ol>
         </nav>
+        <a href="/nsfwgallery/search" class="btn btn-outline-light ms-3"><i class="fas fa-search"></i></a>
+        </div>
 
         <div class="d-flex w-100 flex-column flex-lg-row">
             <div class="col-xs-12 flex-grow-1">
@@ -341,3 +356,13 @@
 
     </div>
 </div>
+
+@if (Model.IsAdmin)
+{
+    <script>
+        function confirmDelete() {
+            if (confirm('Delete this image/video and its metadata? This cannot be undone.'))
+                document.getElementById('delete-form').submit();
+        }
+    </script>
+}

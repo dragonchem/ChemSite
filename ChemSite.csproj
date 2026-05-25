@@ -7,16 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\thumbs\**" />
-    <Content Remove="wwwroot\thumbs\**" />
-    <EmbeddedResource Remove="wwwroot\thumbs\**" />
-    <None Remove="wwwroot\thumbs\**" />
+    <Compile Remove="wwwroot\thumb\**;wwwroot\thumbs\**;wwwroot\ffmpeg\**" />
+    <Content Remove="wwwroot\thumb\**;wwwroot\thumbs\**;wwwroot\ffmpeg\**" />
+    <EmbeddedResource Remove="wwwroot\thumb\**;wwwroot\thumbs\**;wwwroot\ffmpeg\**" />
+    <None Remove="wwwroot\thumb\**;wwwroot\thumbs\**;wwwroot\ffmpeg\**" />
+    <StaticWebAsset Remove="wwwroot\thumb\**;wwwroot\thumbs\**;wwwroot\ffmpeg\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FFMpegCore" Version="5.2.0" />
-    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.5.0" />
-    <PackageReference Include="Magick.NET.Core" Version="14.5.0" />
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.13.1" />
+    <PackageReference Include="Magick.NET.Core" Version="14.13.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
   </ItemGroup>

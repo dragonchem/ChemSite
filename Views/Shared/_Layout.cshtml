@@ -60,7 +60,41 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ChemSite.styles.css" asp-append-version="true" />
-    <script src="https://kit.fontawesome.com/42969dccfc.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+    @if (ViewData["Theme"] is ChemSite.Models.FolderTheme theme)
+    {
+        string DarkenHex(string hex, double factor) {
+            hex = hex.TrimStart('#');
+            if (hex.Length != 6) return "#" + hex;
+            int r = (int)(Convert.ToInt32(hex[0..2], 16) * factor);
+            int g = (int)(Convert.ToInt32(hex[2..4], 16) * factor);
+            int b = (int)(Convert.ToInt32(hex[4..6], 16) * factor);
+            return $"#{r:X2}{g:X2}{b:X2}";
+        }
+        string ToRgbComponents(string hex) {
+            hex = hex.TrimStart('#');
+            if (hex.Length != 6) return "0, 0, 0";
+            return $"{Convert.ToInt32(hex[0..2], 16)}, {Convert.ToInt32(hex[2..4], 16)}, {Convert.ToInt32(hex[4..6], 16)}";
+        }
+        string hoverHex = DarkenHex(theme.Link, 0.75);
+        <style>
+            :root {
+                --theme-page-bg: @theme.PageBackground;
+                --theme-bg: @theme.Background;
+                --theme-section: @theme.Section;
+                --theme-surface: @theme.Surface;
+                --theme-primary: @theme.Primary;
+                --theme-secondary: @theme.Secondary;
+                --theme-accent: @theme.Accent;
+                --theme-link: @theme.Link;
+                --bs-link-color: @theme.Link;
+                --bs-link-color-rgb: @ToRgbComponents(theme.Link);
+                --bs-link-hover-color: @hoverHex;
+                --bs-link-hover-color-rgb: @ToRgbComponents(hoverHex);
+            }
+            a[href]:hover { color: @hoverHex !important; }
+        </style>
+    }
 </head>
 <body>
     @RenderBody()

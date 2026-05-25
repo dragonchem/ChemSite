@@ -1,0 +1,47 @@
+@model GalleryImageContent
+@{
+    string prefix = ViewData["Prefix"] as string ?? "gallery";
+    string folderPath = ViewData["FolderPath"] as string ?? "";
+    string title = Model.Image
+        ? Model.Title
+        : (Model.Title.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ? Model.Title.Substring(0, Model.Title.Length - 4) : Model.Title);
+    string href = $"/{prefix}{(string.IsNullOrEmpty(folderPath) ? "" : $"/{folderPath}")}/{title}";
+}
+<a class="col-lg-2 col-md-3 col-6 mb-3" href="@href">
+    <div class="card">
+        <div class="card-img-top overflow-hidden position-relative">
+            <img class="card-img-top" src="~/thumb/@Model.ImageUrl" alt="@Model.Title" loading="lazy">
+            @if (!Model.Image || Model.Title.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="video-icon">
+                    <i class="fas fa-play"></i>
+                </div>
+            }
+            @if (Model.Pinned)
+            {
+                <div class="pin-icon">
+                    <i class="fas fa-thumbtack"></i>
+                </div>
+            }
+        </div>
+        <div class="card-body">
+            @if (Model.ImageInfo == null)
+            {
+                <h5 class="card-title">@title</h5>
+            }
+            else
+            {
+                <h5 class="card-title">@Model.ImageInfo.Name</h5>
+                <div class="artists">
+                    @foreach (var artist in Model.ImageInfo.ArtistsInfo)
+                    {
+                        <div class="artist mt-1 d-flex flex-row">
+                            <img class="rounded-circle me-1" src="@artist.ProfilePicture" loading="lazy" />
+                            <span class="flex-grow-1 w-75 mt-1">@artist.Name</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</a>

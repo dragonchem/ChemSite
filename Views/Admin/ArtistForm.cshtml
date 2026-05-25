@@ -1,0 +1,97 @@
+@model ChemSite.Models.ArtistInfo
+@{
+    string galleryPrefix = ViewBag.GalleryPrefix as string ?? "gallery";
+    string artistFileName = ViewBag.ArtistFileName as string ?? "";
+    bool hasFolder = ViewBag.HasFolder is bool b && b;
+    bool isEdit = !string.IsNullOrEmpty(artistFileName);
+    string action = isEdit
+        ? $"/{galleryPrefix}/admin/artists/{artistFileName}"
+        : $"/{galleryPrefix}/admin/artists/create";
+    ViewData["Title"] = isEdit ? $"Edit Artist: {Model.Name}" : "New Artist";
+
+    var platformOptions = new[] { "bluesky", "discord", "twitter", "fiverr", "telegram", "deviantart", "instagram", "reddit", "website", "itaku", "furaffinity", "link" };
+}
+
+<div class="flex min-vh-100 align-content-center">
+    <div class="container p-3 rounded-4 shadow-lg" style="max-width:600px">
+        <h2 class="mb-3">@ViewData["Title"]</h2>
+        @if (hasFolder)
+        {
+            <div class="alert alert-info">This artist has a character folder at /art/@artistFileName/</div>
+        }
+        <form method="post" action="@action" enctype="multipart/form-data">
+            <input type="hidden" name="artistFileName" value="@artistFileName" />
+
+            <div class="mb-3">
+                <label class="form-label">Display Name</label>
+                <input type="text" name="displayName" class="form-control" value="@Model.Name" required />
+                @if (!isEdit)
+                {
+                    <div class="form-text">Filename will be auto-derived from display name.</div>
+                }
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Profile Picture</label>
+                @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.ProfilePicture" class="rounded-circle" style="width:60px;height:60px;object-fit:cover" />
+                        <small class="text-secondary ms-2">Current picture — upload a new file to replace</small>
+                    </div>
+                }
+                <input type="file" name="profilePictureFile" class="form-control" accept="image/*" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Platforms</label>
+                <div id="platforms">
+                    @foreach (var p in Model.PlatformInfo)
+                    {
+                        <div class="d-flex gap-2 mb-2 align-items-center platform-row">
+                            <input type="text" name="platformNames" class="form-control form-control-sm" value="@p.Name" placeholder="Name" />
+                            <select name="platformIcons" class="form-select form-select-sm" style="max-width:140px">
+                                @foreach (var opt in platformOptions)
+                                {
+                                    <option value="@opt" selected="@(p.Icon == opt ? "selected" : null)">@opt</option>
+                                }
+                            </select>
+                            <input type="text" name="platformLinks" class="form-control form-control-sm" value="@p.Link" placeholder="URL" />
+                            <label class="d-flex align-items-center gap-1 text-nowrap">
+                                <input type="checkbox" name="platformNsfw" value="true" @(p.Nsfw ? "checked" : "") /> NSFW
+                            </label>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.platform-row').remove()">✕</button>
+                        </div>
+                    }
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPlatform()">+ Add Platform</button>
+            </div>
+
+            <button type="submit" class="btn btn-warning">@(isEdit ? "Save" : "Create")</button>
+            <a href="/@galleryPrefix/admin/artists" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<script>
+    const platformOptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(platformOptions));
+
+    function buildIconSelect(selected) {
+        return `<select name="platformIcons" class="form-select form-select-sm" style="max-width:140px">
+            ${platformOptions.map(o => `<option value="${o}"${o === selected ? ' selected' : ''}>${o}</option>`).join('')}
+        </select>`;
+    }
+
+    function addPlatform() {
+        const d = document.createElement('div');
+        d.className = 'd-flex gap-2 mb-2 align-items-center platform-row';
+        d.innerHTML = `
+            <input type="text" name="platformNames" class="form-control form-control-sm" placeholder="Name" />
+            ${buildIconSelect('link')}
+            <input type="text" name="platformLinks" class="form-control form-control-sm" placeholder="URL" />
+            <label class="d-flex align-items-center gap-1 text-nowrap">
+                <input type="checkbox" name="platformNsfw" value="true" /> NSFW
+            </label>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.platform-row').remove()">✕</button>`;
+        document.getElementById('platforms').appendChild(d);
+    }
+</script>

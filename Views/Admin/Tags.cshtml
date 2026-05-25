@@ -1,0 +1,66 @@
+@model ChemSite.Models.TagsConfig
+@{
+    string galleryPrefix = ViewBag.GalleryPrefix as string ?? "gallery";
+    ViewData["Title"] = "Tag Management";
+}
+
+<div class="flex min-vh-100 align-content-center">
+    <div class="container p-3 rounded-4 shadow-lg">
+        <h2 class="mb-3"><i class="fas fa-tag me-2"></i>Tag Management</h2>
+
+        <div class="mb-4 p-3 section rounded-3">
+            <h5>New Section</h5>
+            <form method="post" action="/@galleryPrefix/admin/tags/section/create" class="d-flex gap-2 align-items-center">
+                <input type="text" name="sectionName" class="form-control form-control-sm" placeholder="Section name" />
+                <label class="d-flex align-items-center gap-1 text-nowrap">
+                    <input type="checkbox" name="nsfw" value="true" /> NSFW only
+                </label>
+                <button type="submit" class="btn btn-sm btn-success">Create</button>
+            </form>
+        </div>
+
+        @foreach (var tagSection in Model.Sections)
+        {
+            string encodedName = Uri.EscapeDataString(tagSection.Name);
+            <div class="mb-3 p-3 section rounded-3">
+                <div class="d-flex align-items-center mb-2">
+                    <h5 class="me-auto mb-0">
+                        @tagSection.Name
+                        @if (tagSection.Nsfw) { <span class="badge bg-danger ms-2">NSFW</span> }
+                    </h5>
+                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteSection('@tagSection.Name')">
+                        <i class="fas fa-trash"></i> Delete Section
+                    </button>
+                    <form id="del-section-@tagSection.Name" method="post" action="/@galleryPrefix/admin/tags/section/@encodedName/delete" class="d-none"></form>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    @foreach (var tag in tagSection.Tags)
+                    {
+                        <span class="badge bg-secondary d-flex align-items-center gap-1">
+                            @tag
+                            <form method="post" action="/@galleryPrefix/admin/tags/section/@encodedName/remove-tag" class="d-inline">
+                                <input type="hidden" name="sectionName" value="@tagSection.Name" />
+                                <input type="hidden" name="tagName" value="@tag" />
+                                <button type="submit" class="btn btn-sm p-0 text-white border-0 ms-1" title="Remove">✕</button>
+                            </form>
+                        </span>
+                    }
+                </div>
+                <form method="post" action="/@galleryPrefix/admin/tags/section/@encodedName/add-tag" class="d-flex gap-2">
+                    <input type="hidden" name="sectionName" value="@tagSection.Name" />
+                    <input type="text" name="tagName" class="form-control form-control-sm" placeholder="New tag" />
+                    <button type="submit" class="btn btn-sm btn-outline-success">Add</button>
+                </form>
+            </div>
+        }
+
+        <a href="/@galleryPrefix" class="btn btn-secondary mt-2">← Back to Gallery</a>
+    </div>
+</div>
+
+<script>
+    function confirmDeleteSection(name) {
+        if (confirm(`Delete section "${name}" and all its tags?`))
+            document.getElementById('del-section-' + name).submit();
+    }
+</script>

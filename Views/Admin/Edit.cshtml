@@ -1,0 +1,224 @@
+@{
+    string galleryPrefix = ViewBag.GalleryPrefix as string ?? "gallery";
+    string filePath = ViewBag.FilePath as string ?? "";
+    string folderPath = ViewBag.FolderPath as string ?? "";
+    var info = ViewBag.Info as ChemSite.Models.ImageInfo ?? new ChemSite.Models.ImageInfo();
+    var artists = ViewBag.Artists as List<string> ?? new List<string>();
+    var tags = ViewBag.Tags as ChemSite.Models.TagsConfig ?? new ChemSite.Models.TagsConfig();
+    ViewData["Title"] = "Edit";
+
+    var platformOptions = new[] { "bluesky", "discord", "twitter", "fiverr", "telegram", "deviantart", "instagram", "reddit", "website", "itaku", "furaffinity", "link" };
+}
+
+<div class="flex min-vh-100 align-content-center">
+    <div class="container p-3 rounded-4 shadow-lg" style="max-width:700px">
+        <h2 class="mb-3"><i class="fas fa-pencil me-2"></i>Edit: @info.Name</h2>
+        <form method="post" action="/@galleryPrefix/admin/edit/@filePath" id="edit-form">
+            <input type="hidden" name="path" value="@filePath" />
+
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control" value="@info.Name" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="4">@info.Description</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Creation Date</label>
+                <input type="date" name="creationDate" class="form-control" value="@info.CreationDate.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Artists</label>
+                <select name="artists" id="artist-select" class="form-select" multiple>
+                    @foreach (var a in artists)
+                    {
+                        <option value="@a" selected="@(info.Artists.Contains(a) ? "selected" : null)">@a</option>
+                    }
+                </select>
+            </div>
+
+            @foreach (var tagSection in tags.Sections)
+            {
+                <div class="mb-3">
+                    <label class="form-label">@tagSection.Name @(tagSection.Nsfw ? "(NSFW)" : "")</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var tag in tagSection.Tags)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="tags" value="@tag" id="tag-@tag"
+                                    checked="@(info.Tags.Contains(tag) ? "checked" : null)" />
+                                <label class="form-check-label" for="tag-@tag">@tag</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" name="pinned" value="true" class="form-check-input" id="pinned"
+                    @(info.Pinned ? "checked" : "") />
+                <label class="form-check-label" for="pinned">Pinned</label>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Alt Paths</label>
+                <div id="alt-paths">
+                    @foreach (var ap in info.AltPaths)
+                    {
+                        <div class="d-flex gap-2 mb-2 align-items-center alt-path-row">
+                            <input type="text" name="altPaths" class="form-control form-control-sm" value="@ap" placeholder="e.g. Chem/nsfw/kinky/image.png" />
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.alt-path-row').remove()">✕</button>
+                        </div>
+                    }
+                </div>
+                <div class="d-flex gap-2 mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addAltPath()">+ Add Path</button>
+                    <button type="button" class="btn btn-sm btn-outline-info" onclick="openBrowseModal()"><i class="fas fa-images me-1"></i>Browse</button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">External Links</label>
+                <div id="ext-links">
+                    @foreach (var link in info.ExternalLinks)
+                    {
+                        <div class="d-flex gap-2 mb-2 align-items-center ext-link-row">
+                            <input type="text" name="externalLinkNames" class="form-control form-control-sm" value="@link.Name" placeholder="Name" />
+                            <select name="externalLinkIcons" class="form-select form-select-sm" style="max-width:140px">
+                                @foreach (var opt in platformOptions)
+                                {
+                                    <option value="@opt" selected="@(link.Icon == opt ? "selected" : null)">@opt</option>
+                                }
+                            </select>
+                            <input type="text" name="externalLinkUrls" class="form-control form-control-sm" value="@link.Link" placeholder="URL" />
+                            <label class="d-flex align-items-center gap-1 text-nowrap">
+                                <input type="checkbox" name="externalLinkNsfw" value="true" checked="@(link.Nsfw ? "checked" : null)" /> NSFW
+                            </label>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.ext-link-row').remove()">✕</button>
+                        </div>
+                    }
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addLink()">+ Add Link</button>
+            </div>
+
+            <button type="submit" class="btn btn-warning">Save</button>
+            <a href="/@galleryPrefix/@filePath" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<!-- Browse Modal -->
+<div class="modal fade" id="browseModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <nav aria-label="breadcrumb" class="flex-grow-1">
+                    <ol class="breadcrumb mb-0" id="browse-breadcrumb"></ol>
+                </nav>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="browse-content" class="row g-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
+<script>
+    new TomSelect('#artist-select', { plugins: ['remove_button'], maxItems: null });
+
+    const platformOptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(platformOptions));
+    const galleryPrefix = '@galleryPrefix';
+    let browseModal;
+    let browsePath = '@folderPath';
+
+    function buildIconSelect(selected) {
+        return `<select name="externalLinkIcons" class="form-select form-select-sm" style="max-width:140px">
+            ${platformOptions.map(o => `<option value="${o}"${o === selected ? ' selected' : ''}>${o}</option>`).join('')}
+        </select>`;
+    }
+
+    function addAltPath(val) {
+        const d = document.createElement('div');
+        d.className = 'd-flex gap-2 mb-2 align-items-center alt-path-row';
+        d.innerHTML = `
+            <input type="text" name="altPaths" class="form-control form-control-sm" value="${val || ''}" placeholder="e.g. Chem/nsfw/kinky/image.png" />
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.alt-path-row').remove()">✕</button>`;
+        document.getElementById('alt-paths').appendChild(d);
+    }
+
+    function addLink() {
+        const d = document.createElement('div');
+        d.className = 'd-flex gap-2 mb-2 align-items-center ext-link-row';
+        d.innerHTML = `
+            <input type="text" name="externalLinkNames" class="form-control form-control-sm" placeholder="Name" />
+            ${buildIconSelect('link')}
+            <input type="text" name="externalLinkUrls" class="form-control form-control-sm" placeholder="URL" />
+            <label class="d-flex align-items-center gap-1 text-nowrap">
+                <input type="checkbox" name="externalLinkNsfw" value="true" /> NSFW
+            </label>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.ext-link-row').remove()">✕</button>`;
+        document.getElementById('ext-links').appendChild(d);
+    }
+
+    function openBrowseModal() {
+        if (!browseModal) browseModal = new bootstrap.Modal(document.getElementById('browseModal'));
+        loadBrowse(browsePath);
+        browseModal.show();
+    }
+
+    function loadBrowse(path) {
+        browsePath = path;
+        fetch(`/${galleryPrefix}/admin/browse?path=${encodeURIComponent(path)}`)
+            .then(r => r.json())
+            .then(data => renderBrowse(path, data));
+    }
+
+    function renderBrowse(path, data) {
+        const crumb = document.getElementById('browse-breadcrumb');
+        const parts = path ? path.split('/') : [];
+        let html = `<li class="breadcrumb-item"><a href="#" onclick="loadBrowse('');return false">Root</a></li>`;
+        let built = '';
+        for (const p of parts) {
+            built = built ? `${built}/${p}` : p;
+            const capture = built;
+            html += `<li class="breadcrumb-item"><a href="#" onclick="loadBrowse('${capture}');return false">${p}</a></li>`;
+        }
+        crumb.innerHTML = html;
+
+        let content = '';
+        for (const f of data.folders) {
+            content += `<div class="col-lg-2 col-md-3 col-4">
+                <div class="card h-100 cursor-pointer" onclick="loadBrowse('${f.path.replace(/'/g,"\\'")}')">
+                    <div class="card-img-top d-flex align-items-center justify-content-center" style="height:80px">
+                        <i class="fas fa-folder fa-2x text-secondary"></i>
+                    </div>
+                    <div class="card-body p-1"><small>${f.name}</small></div>
+                </div>
+            </div>`;
+        }
+        for (const img of data.images) {
+            const thumb = img.thumb ? `<img src="${img.thumb}" class="card-img-top" style="height:80px;object-fit:cover">` : `<i class="fas fa-image fa-2x text-secondary"></i>`;
+            content += `<div class="col-lg-2 col-md-3 col-4">
+                <div class="card h-100 cursor-pointer border-success" onclick="selectImage('${img.path.replace(/'/g,"\\'")}')">
+                    <div class="card-img-top d-flex align-items-center justify-content-center" style="height:80px;overflow:hidden">${thumb}</div>
+                    <div class="card-body p-1"><small>${img.name}</small></div>
+                </div>
+            </div>`;
+        }
+        document.getElementById('browse-content').innerHTML = content || '<p class="text-secondary">Empty folder</p>';
+    }
+
+    function selectImage(path) {
+        addAltPath(path);
+        browseModal.hide();
+    }
+</script>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .cursor-pointer:hover { opacity: 0.85; }
+</style>

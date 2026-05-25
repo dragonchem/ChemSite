@@ -1,4 +1,6 @@
-﻿namespace ChemSite.Models
+﻿using System.Text.Json.Serialization;
+
+namespace ChemSite.Models
 {
     public class ImageInfo
     {
@@ -38,6 +40,8 @@
         /// Info on the external links to this post
         /// </summary>
         public PlatformInfo[] ExternalLinks { get; set; } = [];
+        public string[] Tags { get; set; } = [];
+        public bool Pinned { get; set; } = false;
     }
 
     public class PlatformInfo
@@ -66,6 +70,11 @@
         /// Name of the artist
         /// </summary>
         public string Name { get; set; } = "";
+        /// <summary>
+        /// Filename key (not serialized) — populated at runtime from the JSON filename
+        /// </summary>
+        [JsonIgnore]
+        public string FileName { get; set; } = "";
         /// <summary>
         /// Public link to a profile picture of the artist
         /// </summary>

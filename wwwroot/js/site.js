@@ -1,4 +1,14 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+function centerActivePage() {
+    const viewport = document.querySelector('.page-center-viewport');
+    const ul = viewport && viewport.querySelector('.pagination');
+    const active = ul && ul.querySelector('.page-item.active');
+    if (!viewport || !ul || !active) return;
 
-// Write your JavaScript code.
+    ul.style.transform = '';
+    const activeCenter = active.offsetLeft + active.offsetWidth / 2;
+    const translateX = viewport.offsetWidth / 2 - activeCenter;
+    ul.style.transform = 'translateX(' + translateX + 'px)';
+}
+
+document.addEventListener('DOMContentLoaded', centerActivePage);
+window.addEventListener('resize', centerActivePage);

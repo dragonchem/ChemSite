@@ -1,0 +1,169 @@
+{
+  "Themes": [
+    {
+      "Folder": "",
+      "Primary": "#888888",
+      "Secondary": "#555555",
+      "Accent": "#aaaaaa",
+      "PageBackground": "#181818",
+      "Background": "#242424",
+      "Section": "#2e2e2e",
+      "Surface": "#4a4a4a",
+      "Link": "#52bdf8"
+    },
+    {
+      "Folder": "Chem",
+      "Primary": "#D5810E",
+      "Secondary": "#8B4513",
+      "Accent": "#F4A940",
+      "PageBackground": "#150B0A",
+      "Background": "#1C0E0D",
+      "Section": "#2A1514",
+      "Surface": "#452620",
+      "Link": "#52bdf8"
+    },
+    {
+      "Folder": "Berry",
+      "Primary": "#5ecd51",
+      "Secondary": "#6ed163",
+      "Accent": "#58cb4b",
+      "PageBackground": "#181818",
+      "Background": "#313131",
+      "Section": "#4b4b4b",
+      "Surface": "#646464",
+      "Link": "#5ecd51"
+    },
+    {
+      "Folder": "Bianca",
+      "Primary": "#fc0032",
+      "Secondary": "#e8012f",
+      "Accent": "#d3012b",
+      "PageBackground": "#2c2318",
+      "Background": "#453c31",
+      "Section": "#5f564b",
+      "Surface": "#786f64",
+      "Link": "#fc0032"
+    },
+    {
+      "Folder": "Cham",
+      "Primary": "#8fdffe",
+      "Secondary": "#75c5fd",
+      "Accent": "#90dffe",
+      "PageBackground": "#383b42",
+      "Background": "#51545b",
+      "Section": "#6b6e75",
+      "Surface": "#84878e",
+      "Link": "#8fdffe"
+    },
+    {
+      "Folder": "Gibby",
+      "Primary": "#4ee874",
+      "Secondary": "#209cbd",
+      "Accent": "#0e6299",
+      "PageBackground": "#1b1e29",
+      "Background": "#343742",
+      "Section": "#4e515c",
+      "Surface": "#676a75",
+      "Link": "#4ee874"
+    },
+    {
+      "Folder": "Mallow",
+      "Primary": "#f49acc",
+      "Secondary": "#ed66b1",
+      "Accent": "#eb66b0",
+      "PageBackground": "#280e1d",
+      "Background": "#412736",
+      "Section": "#5b4150",
+      "Surface": "#745a69",
+      "Link": "#f49acc"
+    },
+    {
+      "Folder": "Milkshake",
+      "Primary": "#c215e6",
+      "Secondary": "#a725c2",
+      "Accent": "#ebcaf1",
+      "PageBackground": "#1e1720",
+      "Background": "#373039",
+      "Section": "#514a53",
+      "Surface": "#6a636c",
+      "Link": "#c215e6"
+    },
+    {
+      "Folder": "Thanir",
+      "Primary": "#f89e01",
+      "Secondary": "#2f064a",
+      "Accent": "#ad681a",
+      "PageBackground": "#221125",
+      "Background": "#3b2a3e",
+      "Section": "#554458",
+      "Surface": "#6e5d71",
+      "Link": "#f89e01"
+    },
+    {
+      "Folder": "Yam",
+      "Primary": "#f9ec52",
+      "Secondary": "#f9ec52",
+      "Accent": "#d0fae6",
+      "PageBackground": "#19190b",
+      "Background": "#323224",
+      "Section": "#4c4c3e",
+      "Surface": "#656557",
+      "Link": "#f9ec52"
+    },
+    {
+      "Folder": null,
+      "Primary": "#888888",
+      "Secondary": "#555555",
+      "Accent": "#aaaaaa",
+      "PageBackground": "#181818",
+      "Background": "#1a1a1a",
+      "Section": "#2e2e2e",
+      "Surface": "#242424",
+      "Link": "#52bdf8"
+    },
+    {
+      "Folder": "Kobolds/NSFW/Amy",
+      "Primary": "#cb93f3",
+      "Secondary": "#7927fc",
+      "Accent": "#5319a4",
+      "PageBackground": "#1a0f29",
+      "Background": "#311d4e",
+      "Section": "#43305f",
+      "Surface": "#69508b",
+      "Link": "#cb93f3"
+    },
+    {
+      "Folder": "Kobolds/NSFW/Belle",
+      "Primary": "#fe7171",
+      "Secondary": "#c50020",
+      "Accent": "#fdafa6",
+      "PageBackground": "#380f15",
+      "Background": "#4b1118",
+      "Section": "#632129",
+      "Surface": "#803840",
+      "Link": "#fe7171"
+    },
+    {
+      "Folder": "Kobolds/NSFW/Phire",
+      "Primary": "#96c2e7",
+      "Secondary": "#14588b",
+      "Accent": "#0f3452",
+      "PageBackground": "#0a1620",
+      "Background": "#232f39",
+      "Section": "#3d4953",
+      "Surface": "#56626c",
+      "Link": "#96c2e7"
+    },
+    {
+      "Folder": "Kobolds",
+      "Primary": "#93c0e6",
+      "Secondary": "#1164a2",
+      "Accent": "#e33c49",
+      "PageBackground": "#371519",
+      "Background": "#32283e",
+      "Section": "#15344c",
+      "Surface": "#1a4260",
+      "Link": "#93c0e6"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "Sections": [
+    {
+      "Name": "Character",
+      "Nsfw": false,
+      "Tags": [
+        "Chem",
+        "Yam",
+        "Berry",
+        "Bianca"
+      ]
+    },
+    {
+      "Name": "Content",
+      "Nsfw": false,
+      "Tags": [
+        "Solo",
+        "Couple",
+        "Group"
+      ]
+    },
+    {
+      "Name": "Vibe",
+      "Nsfw": false,
+      "Tags": [
+        "Cute",
+        "Silly",
+        "Action",
+        "Serious"
+      ]
+    },
+    {
+      "Name": "Kinks",
+      "Nsfw": true,
+      "Tags": [
+        "Vore",
+        "Hyper"
+      ]
+    }
+  ]
+}

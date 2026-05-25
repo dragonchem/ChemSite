@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Rebuilding Thumbnails";
+    string prefix = ViewBag.GalleryPrefix as string ?? "gallery";
+}
+
+<div class="flex min-vh-100 align-content-center">
+    <div class="container p-4 max-vh-95 rounded-4 shadow-lg" style="max-width: 640px; margin: auto;">
+        <h2 class="mb-4"><i class="fas fa-images me-2"></i>Rebuilding Thumbnails</h2>
+
+        <div id="status-running">
+            <div class="d-flex justify-content-between mb-1">
+                <span id="current-file" class="text-secondary small text-truncate me-3">Starting...</span>
+                <span id="count-label" class="text-secondary small text-nowrap">0 / 0</span>
+            </div>
+            <div class="progress mb-3" style="height: 22px;">
+                <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                     role="progressbar" style="width: 0%">0%</div>
+            </div>
+        </div>
+
+        <div id="status-complete" class="d-none">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>All thumbnails rebuilt successfully.
+            </div>
+            <a href="/@prefix" class="btn btn-primary">Back to Gallery</a>
+        </div>
+
+        <div id="status-error" class="d-none">
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="error-message"></span>
+            </div>
+            <a href="/@prefix" class="btn btn-secondary">Back to Gallery</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const statusUrl = '/@prefix/admin/rebuild-thumbnails/status';
+
+    function poll() {
+        fetch(statusUrl)
+            .then(r => r.json())
+            .then(data => {
+                const pct = data.total > 0 ? Math.round(data.done / data.total * 100) : 0;
+                document.getElementById('progress-bar').style.width = pct + '%';
+                document.getElementById('progress-bar').textContent = pct + '%';
+                document.getElementById('count-label').textContent = data.done + ' / ' + data.total;
+                document.getElementById('current-file').textContent = data.currentFile || '';
+
+                if (data.error) {
+                    document.getElementById('status-running').classList.add('d-none');
+                    document.getElementById('status-error').classList.remove('d-none');
+                    document.getElementById('error-message').textContent = data.error;
+                } else if (data.isComplete && !data.isRunning) {
+                    document.getElementById('progress-bar').classList.remove('progress-bar-animated');
+                    document.getElementById('progress-bar').style.width = '100%';
+                    document.getElementById('progress-bar').textContent = '100%';
+                    document.getElementById('count-label').textContent = data.total + ' / ' + data.total;
+                    document.getElementById('current-file').textContent = '';
+                    setTimeout(() => {
+                        document.getElementById('status-running').classList.add('d-none');
+                        document.getElementById('status-complete').classList.remove('d-none');
+                    }, 400);
+                } else {
+                    setTimeout(poll, 500);
+                }
+            })
+            .catch(() => setTimeout(poll, 1000));
+    }
+
+    poll();
+</script>

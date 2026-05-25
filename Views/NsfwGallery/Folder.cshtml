@@ -1,4 +1,4 @@
-﻿@model GalleryFolderViewModel
+@model GalleryFolderViewModel
 @{
     ViewData["Title"] = "Chem's art gallery (NSFW)";
     if (Model.Path.Split("/").Last() != "")
@@ -8,19 +8,22 @@
     ViewData["Description"] = $"NSFW Gallery{(Model.PathParts.First() != "" ? " > " : "")}{String.Join(" > ", Model.PathParts)}";
     ViewData["Url"] = $"/nsfwgallery/{Model.Path}";
     ViewData["Summary"] = "twitter:card";
+    ViewData["SearchUrl"] = "/nsfwgallery/search";
     if (Model.Path == "")
     {
         ViewData["Image"] = "/art/Chem/20211231_-_Kitten_drago_chem - ShiraHoshiD.png";
     }
-    else
+    else if (!string.IsNullOrEmpty(Model.ImageUrl))
     {
         ViewData["Image"] = "/thumb/gallery" + Model.ImageUrl;
     }
+
+    bool hasTheme = ViewData["HasTheme"] is bool ht && ht;
+    int totalPages = (int)Math.Ceiling((double)Model.TotalImages / Model.PageSize);
 }
 
 <script>
     const nsfw = localStorage.getItem("NSFW") === 'true';
-
     if (!nsfw) {
         window.location.href = `/disclaimer?url=${encodeURI(window.location.pathname)}`
     }
@@ -28,8 +31,53 @@
 
 <div class="flex min-vh-100 align-content-center">
     <div class="container p-3 align-middle max-vh-95 overflow-y-scroll rounded-4 shadow-lg">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+        @if (Model.IsAdmin)
+        {
+            <div class="admin-bar d-flex flex-wrap gap-2 mb-3 p-2 rounded-3">
+                <span class="text-secondary me-2 align-self-center">Admin:</span>
+                <a href="/nsfwgallery/admin/upload?path=@Model.Path" class="btn btn-sm btn-outline-success"><i class="fas fa-plus me-1"></i>Upload</a>
+                <a href="/nsfwgallery/admin/artists" class="btn btn-sm btn-outline-secondary"><i class="fas fa-user me-1"></i>Artists</a>
+                <a href="/nsfwgallery/admin/tags" class="btn btn-sm btn-outline-secondary"><i class="fas fa-tag me-1"></i>Tags</a>
+                <a href="/nsfwgallery/admin/themes/folder?folderPath=@Model.Path" class="btn btn-sm @(hasTheme ? "btn-outline-success" : "btn-outline-secondary")"><i class="fas fa-palette me-1"></i>Theme</a>
+                @if (Model.Path != "")
+                {
+                    <button class="btn btn-sm btn-outline-warning" onclick="showRenameForm()"><i class="fas fa-pencil me-1"></i>Rename</button>
+                    @if (Model.TotalImages == 0 && Model.Folders.Count == 0)
+                    {
+                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteFolder()"><i class="fas fa-trash me-1"></i>Delete Folder</button>
+                    }
+                }
+                <button class="btn btn-sm btn-outline-info" onclick="showNewFolderForm()"><i class="fas fa-folder-plus me-1"></i>New Folder</button>
+                <button class="btn btn-sm btn-outline-danger ms-auto" onclick="confirmRebuildThumbs()"><i class="fas fa-images me-1"></i>Rebuild Thumbnails</button>
+            </div>
+            <form id="rebuild-thumbs-form" method="post" action="/nsfwgallery/admin/rebuild-thumbnails" class="d-none"></form>
+            <div id="rename-form" class="d-none mb-2">
+                <form method="post" action="/nsfwgallery/admin/rename-folder" class="d-flex gap-2">
+                    <input type="hidden" name="path" value="@Model.Path" />
+                    <input type="text" name="newName" class="form-control form-control-sm" placeholder="New folder name" value="@Model.Path.Split('/').Last()" />
+                    <button type="submit" class="btn btn-sm btn-warning">Rename</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="hideRenameForm()">Cancel</button>
+                </form>
+            </div>
+            <div id="new-folder-form" class="d-none mb-2">
+                <form method="post" action="/nsfwgallery/admin/create-folder" class="d-flex gap-2">
+                    <input type="hidden" name="parentPath" value="@Model.Path" />
+                    <input type="text" name="folderName" class="form-control form-control-sm" placeholder="Folder name" />
+                    <button type="submit" class="btn btn-sm btn-info">Create</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="hideNewFolderForm()">Cancel</button>
+                </form>
+            </div>
+            @if (Model.Path != "")
+            {
+                <form id="delete-folder-form" method="post" action="/nsfwgallery/admin/delete-folder" class="d-none">
+                    <input type="hidden" name="path" value="@Model.Path" />
+                </form>
+            }
+        }
+
+        <div class="d-flex align-items-center justify-content-between">
+        <nav aria-label="breadcrumb" class="flex-grow-1">
+            <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item">
                     <a href="/">
                         <img src="~/art/Chem/emotes/chemHi.png" loading="lazy" />
@@ -47,31 +95,40 @@
                         if (part != "")
                         {
                             fullPath += $"{part}";
-                                <li class="breadcrumb-item align-self-center">
-                                    <a href="/nsfwgallery/@fullPath">
-                                        @part
-                                    </a>
-                                </li>
+                            <li class="breadcrumb-item align-self-center">
+                                <a href="/nsfwgallery/@fullPath">@part</a>
+                            </li>
                             fullPath += "/";
                         }
                     }
                 }
             </ol>
         </nav>
+        <a href="/nsfwgallery/search" class="btn btn-outline-light ms-3"><i class="fas fa-search"></i></a>
+        </div>
 
         @if (Model.Path.Split("/").Last() != "")
         {
-            <h2>
-                @Model.Path.Split("/").Last()
-            </h2>
+            <h2>@Model.Path.Split("/").Last()</h2>
         }
         else
         {
-            <h2>
-                NSFW Gallery
-            </h2>
+            <h2>NSFW Gallery</h2>
         }
-        
+
+        @if (Model.PinnedImages.Count > 0)
+        {
+            <div class="container shadow-lg rounded-3 section p-3 mt-3">
+                <h3 class="mb-3"><i class="fas fa-thumbtack me-2"></i>Pinned</h3>
+                <div class="row">
+                    @foreach (var item in Model.PinnedImages)
+                    {
+                        @await Html.PartialAsync("_GalleryCard", item, new ViewDataDictionary(ViewData) { { "Prefix", "nsfwgallery" }, { "FolderPath", Model.Path } })
+                    }
+                </div>
+            </div>
+        }
+
         @if (Model.Folders.Count > 0)
         {
             <div class="container shadow-lg rounded-3 section p-3 mt-3">
@@ -81,13 +138,18 @@
                     {
                         <a class="col-lg-2 col-md-3 col-6 mb-3" href="/nsfwgallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@item.Title">
                             <div class="card">
-                                <div class="card-img-top overflow-hidden">
-                                    <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title" loading="lazy" />
+                                <div class="card-img-top overflow-hidden d-flex align-items-center justify-content-center" style="min-height:100px">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-folder fa-3x text-secondary"></i>
+                                    }
                                 </div>
                                 <div class="card-body">
-                                    <h5 class="card-title">
-                                        @item.Title
-                                    </h5>
+                                    <h5 class="card-title">@item.Title</h5>
                                 </div>
                             </div>
                         </a>
@@ -96,7 +158,6 @@
             </div>
         }
 
-        
         @if (Model.Images.Count > 0)
         {
             <div class="container shadow-lg rounded-3 section p-3 mt-3">
@@ -104,45 +165,45 @@
                 <div class="row">
                     @foreach (var item in Model.Images)
                     {
-                        <a class="col-lg-2 col-md-3 col-6 mb-3" href="/nsfwgallery@(Model.Path == "" ? "" : $"/{Model.Path}")/@(item.Image ? item.Title : item.Title.Substring(0, item.Title.Length - 4))">
-                            <div class="card">
-                                <div class="card-img-top overflow-hidden">
-                                    <img class="card-img-top" src="~/thumb/@item.ImageUrl" alt="@item.Title" loading="lazy" />
-                                    @if (!item.Image || item.Title.EndsWith("mp4") || item.Title.EndsWith("mov"))
-                                    {
-                                        <div class="video-icon">
-                                            <i class="fas fa-play"></i>
-                                        </div>
-                                    }
-                                </div>
-                                <div class="card-body">
-                                    @if (item.ImageInfo == null)
-                                    {
-                                        <h5 class="card-title">
-                                            @item.Title
-                                        </h5>
-                                    }
-                                    else
-                                    {
-                                        <h5 class="card-title">
-                                            @item.ImageInfo.Name
-                                        </h5>
-                                        <div class="artists">
-                                            @foreach(var artist in item.ImageInfo.ArtistsInfo)
-                                            {
-                                                <div class="artist mt-1 d-flex flex-row">
-                                                    <img class="rounded-circle me-1" src="@artist.ProfilePicture" loading="lazy" />
-                                                    <span class="flex-grow-1 w-75 mt-1">@artist.Name</span>
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        </a>
+                        @await Html.PartialAsync("_GalleryCard", item, new ViewDataDictionary(ViewData) { { "Prefix", "nsfwgallery" }, { "FolderPath", Model.Path } })
                     }
                 </div>
+                @if (totalPages > 1)
+                {
+                    <div class="pagination-wrap mt-3">
+                        <a class="page-arrow @(Model.Page == 1 ? "disabled" : "")" href="?page=@(Model.Page - 1)">‹</a>
+                        <div class="page-center-viewport">
+                            <ul class="pagination flex-nowrap mb-0">
+                                @for (int p = 1; p <= totalPages; p++)
+                                {
+                                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                                        <a class="page-link" href="?page=@p">@p</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <a class="page-arrow @(Model.Page == totalPages ? "disabled" : "")" href="?page=@(Model.Page + 1)">›</a>
+                    </div>
+                }
             </div>
         }
     </div>
 </div>
+
+@if (Model.IsAdmin)
+{
+    <script>
+        function showRenameForm() { document.getElementById('rename-form').classList.remove('d-none'); }
+        function hideRenameForm() { document.getElementById('rename-form').classList.add('d-none'); }
+        function showNewFolderForm() { document.getElementById('new-folder-form').classList.remove('d-none'); }
+        function hideNewFolderForm() { document.getElementById('new-folder-form').classList.add('d-none'); }
+        function confirmDeleteFolder() {
+            if (confirm('Delete this folder and all its contents? This cannot be undone.'))
+                document.getElementById('delete-folder-form').submit();
+        }
+        function confirmRebuildThumbs() {
+            if (confirm('Rebuild all thumbnails now? This may take a while.'))
+                document.getElementById('rebuild-thumbs-form').submit();
+        }
+    </script>
+}

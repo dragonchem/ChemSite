@@ -1,0 +1,163 @@
+@model ChemSite.Models.ThemesConfig
+@{
+    ViewData["Title"] = "Theme Editor";
+    string prefix = ViewBag.GalleryPrefix as string ?? "gallery";
+}
+
+<div class="flex min-vh-100 align-content-center">
+    <div class="container p-3 max-vh-95 overflow-y-scroll rounded-4 shadow-lg">
+        <div class="d-flex align-items-center mb-3">
+            <a href="/@prefix" class="me-3 text-secondary"><i class="fas fa-arrow-left"></i></a>
+            <h2 class="mb-0"><i class="fas fa-palette me-2"></i>Theme Editor</h2>
+        </div>
+
+        <div class="section rounded-3 p-3 mb-3">
+            <p class="text-secondary mb-0">
+                Folder themes cascade: if a subfolder has no theme, it inherits from the nearest parent. The root theme (empty folder) is the global fallback.
+            </p>
+        </div>
+
+        <div class="section rounded-3 p-3 mb-4">
+            <h5 class="mb-3">Configured Themes</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Folder</th>
+                            <th>Primary</th>
+                            <th>Secondary</th>
+                            <th>Accent</th>
+                            <th>Page</th>
+                            <th>Container</th>
+                            <th>Section</th>
+                            <th>Surface</th>
+                            <th>Links</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model.Themes)
+                        {
+                            <tr>
+                                <td>
+                                    <code>@(string.IsNullOrEmpty(t.Folder) ? "(root)" : t.Folder)</code>
+                                </td>
+                                <td><span class="color-swatch" style="background:@t.Primary"></span> @t.Primary</td>
+                                <td><span class="color-swatch" style="background:@t.Secondary"></span> @t.Secondary</td>
+                                <td><span class="color-swatch" style="background:@t.Accent"></span> @t.Accent</td>
+                                <td><span class="color-swatch" style="background:@t.PageBackground"></span> @t.PageBackground</td>
+                                <td><span class="color-swatch" style="background:@t.Background"></span> @t.Background</td>
+                                <td><span class="color-swatch" style="background:@t.Section"></span> @t.Section</td>
+                                <td><span class="color-swatch" style="background:@t.Surface"></span> @t.Surface</td>
+                                <td><span class="color-swatch" style="background:@t.Link"></span> @t.Link</td>
+                                <td class="text-nowrap">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="editTheme(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(t)))">
+                                        <i class="fas fa-pencil"></i>
+                                    </button>
+                                    @if (!string.IsNullOrEmpty(t.Folder))
+                                    {
+                                        <form method="post" action="/@prefix/admin/themes/delete" class="d-inline ms-1">
+                                            <input type="hidden" name="folder" value="@t.Folder" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete theme for @t.Folder?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section rounded-3 p-3">
+            <h5 class="mb-3" id="form-heading">Add Theme</h5>
+            <form method="post" action="/@prefix/admin/themes/set" id="theme-form">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Folder path</label>
+                        <input type="text" name="Folder" id="field-folder" class="form-control form-control-sm" placeholder="e.g. Chem or Chem/Sub (empty = root)" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label" title="Active highlights, selected pagination">Selected</label>
+                        <input type="color" name="Primary" id="field-primary" class="form-control form-control-color" value="#888888" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label" title="Outline buttons, accents">Buttons</label>
+                        <input type="color" name="Secondary" id="field-secondary" class="form-control form-control-color" value="#555555" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label" title="Hover/focus glow">Hover</label>
+                        <input type="color" name="Accent" id="field-accent" class="form-control form-control-color" value="#52bdf8" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label" title="Page background">Page</label>
+                        <input type="color" name="PageBackground" id="field-page-background" class="form-control form-control-color" value="#181818" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label" title="Main container background">Container</label>
+                        <input type="color" name="Background" id="field-background" class="form-control form-control-color" value="#1a1a1a" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label" title="Section panel background">Section</label>
+                        <input type="color" name="Section" id="field-section" class="form-control form-control-color" value="#2e2e2e" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label" title="Card &amp; panel background">Cards</label>
+                        <input type="color" name="Surface" id="field-surface" class="form-control form-control-color" value="#383838" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label" title="Anchor/link color">Links</label>
+                        <input type="color" name="Link" id="field-link" class="form-control form-control-color" value="#52bdf8" />
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                        <button type="button" class="btn btn-sm btn-secondary ms-1" onclick="resetForm()">Reset</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .color-swatch {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 1px solid rgba(255,255,255,0.2);
+        vertical-align: middle;
+        margin-right: 4px;
+    }
+</style>
+
+<script>
+    function editTheme(t) {
+        document.getElementById('form-heading').textContent = 'Edit Theme: ' + (t.folder || t.Folder || '(root)');
+        document.getElementById('field-folder').value = t.folder ?? t.Folder ?? '';
+        document.getElementById('field-primary').value = t.primary ?? t.Primary ?? '#888888';
+        document.getElementById('field-secondary').value = t.secondary ?? t.Secondary ?? '#555555';
+        document.getElementById('field-accent').value = t.accent ?? t.Accent ?? '#aaaaaa';
+        document.getElementById('field-page-background').value = t.pageBackground ?? t.PageBackground ?? '#181818';
+        document.getElementById('field-background').value = t.background ?? t.Background ?? '#1a1a1a';
+        document.getElementById('field-section').value = t.section ?? t.Section ?? '#2e2e2e';
+        document.getElementById('field-surface').value = t.surface ?? t.Surface ?? '#383838';
+        document.getElementById('field-link').value = t.link ?? t.Link ?? '#52bdf8';
+        document.getElementById('theme-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        document.getElementById('form-heading').textContent = 'Add Theme';
+        document.getElementById('field-folder').value = '';
+        document.getElementById('field-primary').value = '#888888';
+        document.getElementById('field-secondary').value = '#555555';
+        document.getElementById('field-accent').value = '#aaaaaa';
+        document.getElementById('field-page-background').value = '#181818';
+        document.getElementById('field-background').value = '#1a1a1a';
+        document.getElementById('field-section').value = '#2e2e2e';
+        document.getElementById('field-surface').value = '#383838';
+        document.getElementById('field-link').value = '#52bdf8';
+    }
+</script>

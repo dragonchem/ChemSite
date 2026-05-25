@@ -1,0 +1,182 @@
+@model ChemSite.Models.FolderTheme
+@{
+    string prefix = ViewBag.GalleryPrefix as string ?? "gallery";
+    string returnUrl = ViewBag.ReturnUrl as string ?? $"/{prefix}";
+    bool hasTheme = ViewBag.HasTheme is bool b && b;
+    string folderLabel = string.IsNullOrEmpty(Model.Folder) ? "(root)" : Model.Folder;
+    ViewData["Title"] = $"Theme: {folderLabel}";
+}
+
+<div class="flex min-vh-100 align-content-center">
+    <div class="container p-3 rounded-4 shadow-lg" style="max-width:600px">
+        <div class="d-flex align-items-center mb-3">
+            <a href="@returnUrl" class="me-3 text-secondary"><i class="fas fa-arrow-left"></i></a>
+            <h2 class="mb-0"><i class="fas fa-palette me-2"></i>Theme: @folderLabel</h2>
+        </div>
+
+        @if (!hasTheme)
+        {
+            <div class="alert alert-secondary">No theme configured for this folder — colors will be inherited from the nearest parent.</div>
+        }
+
+        <div class="mb-3">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openBrowseModal()">
+                <i class="fas fa-image me-1"></i>Pick colors from image
+            </button>
+            <span id="suggest-status" class="ms-2 text-secondary small"></span>
+        </div>
+
+        <form method="post" action="/@prefix/admin/themes/set">
+            <input type="hidden" name="Folder" value="@Model.Folder" />
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <label class="form-label">Selected <small class="text-secondary">(active highlights)</small></label>
+                    <input type="color" name="Primary" id="field-primary" class="form-control form-control-color w-100" value="@Model.Primary" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Buttons <small class="text-secondary">(outline buttons)</small></label>
+                    <input type="color" name="Secondary" id="field-secondary" class="form-control form-control-color w-100" value="@Model.Secondary" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Hover <small class="text-secondary">(hover/focus glow)</small></label>
+                    <input type="color" name="Accent" id="field-accent" class="form-control form-control-color w-100" value="@Model.Accent" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Page <small class="text-secondary">(page background)</small></label>
+                    <input type="color" name="PageBackground" id="field-page-background" class="form-control form-control-color w-100" value="@(string.IsNullOrEmpty(Model.PageBackground) ? "#181818" : Model.PageBackground)" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Container <small class="text-secondary">(main container background)</small></label>
+                    <input type="color" name="Background" id="field-background" class="form-control form-control-color w-100" value="@Model.Background" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Section <small class="text-secondary">(section panel background)</small></label>
+                    <input type="color" name="Section" id="field-section" class="form-control form-control-color w-100" value="@(string.IsNullOrEmpty(Model.Section) ? "#2e2e2e" : Model.Section)" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Cards <small class="text-secondary">(card & panel background)</small></label>
+                    <input type="color" name="Surface" id="field-surface" class="form-control form-control-color w-100" value="@Model.Surface" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Links <small class="text-secondary">(anchor/link color)</small></label>
+                    <input type="color" name="Link" id="field-link" class="form-control form-control-color w-100" value="@(string.IsNullOrEmpty(Model.Link) ? "#52bdf8" : Model.Link)" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Theme</button>
+            <a href="@returnUrl" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+
+        @if (hasTheme && !string.IsNullOrEmpty(Model.Folder))
+        {
+            <form method="post" action="/@prefix/admin/themes/delete" class="mt-3">
+                <input type="hidden" name="folder" value="@Model.Folder" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <button type="submit" class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Delete theme for @folderLabel? Colors will fall back to the nearest parent theme.')">
+                    <i class="fas fa-trash me-1"></i>Delete Theme
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<!-- Browse Modal -->
+<div class="modal fade" id="browseModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <nav aria-label="breadcrumb" class="flex-grow-1">
+                    <ol class="breadcrumb mb-0" id="browse-breadcrumb"></ol>
+                </nav>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="browse-content" class="row g-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .cursor-pointer:hover { opacity: 0.85; }
+</style>
+
+<script>
+    const galleryPrefix = '@prefix';
+    let browseModal;
+    let browsePath = '@Model.Folder';
+
+    function openBrowseModal() {
+        if (!browseModal) browseModal = new bootstrap.Modal(document.getElementById('browseModal'));
+        loadBrowse(browsePath);
+        browseModal.show();
+    }
+
+    function loadBrowse(path) {
+        browsePath = path;
+        fetch(`/${galleryPrefix}/admin/browse?path=${encodeURIComponent(path)}`)
+            .then(r => r.json())
+            .then(data => renderBrowse(path, data));
+    }
+
+    function renderBrowse(path, data) {
+        const crumb = document.getElementById('browse-breadcrumb');
+        const parts = path ? path.split('/') : [];
+        let html = `<li class="breadcrumb-item"><a href="#" onclick="loadBrowse('');return false">Root</a></li>`;
+        let built = '';
+        for (const p of parts) {
+            built = built ? `${built}/${p}` : p;
+            const capture = built;
+            html += `<li class="breadcrumb-item"><a href="#" onclick="loadBrowse('${capture}');return false">${p}</a></li>`;
+        }
+        crumb.innerHTML = html;
+
+        let content = '';
+        for (const f of data.folders) {
+            content += `<div class="col-lg-2 col-md-3 col-4">
+                <div class="card h-100 cursor-pointer" onclick="loadBrowse('${f.path.replace(/'/g,"\\'")}')">
+                    <div class="card-img-top d-flex align-items-center justify-content-center" style="height:80px">
+                        <i class="fas fa-folder fa-2x text-secondary"></i>
+                    </div>
+                    <div class="card-body p-1"><small>${f.name}</small></div>
+                </div>
+            </div>`;
+        }
+        for (const img of data.images) {
+            const thumb = img.thumb
+                ? `<img src="${img.thumb}" class="card-img-top" style="height:80px;object-fit:cover">`
+                : `<i class="fas fa-image fa-2x text-secondary"></i>`;
+            content += `<div class="col-lg-2 col-md-3 col-4">
+                <div class="card h-100 cursor-pointer border-success" onclick="suggestFromImage('${img.path.replace(/'/g,"\\'")}')">
+                    <div class="card-img-top d-flex align-items-center justify-content-center" style="height:80px;overflow:hidden">${thumb}</div>
+                    <div class="card-body p-1"><small>${img.name}</small></div>
+                </div>
+            </div>`;
+        }
+        document.getElementById('browse-content').innerHTML = content || '<p class="text-secondary">Empty folder</p>';
+    }
+
+    function suggestFromImage(path) {
+        browseModal.hide();
+        const status = document.getElementById('suggest-status');
+        status.textContent = 'Analysing image…';
+        fetch(`/${galleryPrefix}/admin/themes/suggest-colors?imagePath=${encodeURIComponent(path)}`)
+            .then(r => r.json())
+            .then(colors => {
+                document.getElementById('field-primary').value    = colors.primary;
+                document.getElementById('field-secondary').value  = colors.secondary;
+                document.getElementById('field-accent').value     = colors.accent;
+                document.getElementById('field-page-background').value = colors.pageBackground;
+                document.getElementById('field-background').value = colors.background;
+                document.getElementById('field-section').value    = colors.section;
+                document.getElementById('field-surface').value    = colors.surface;
+                document.getElementById('field-link').value       = colors.link;
+                status.textContent = `Suggested from: ${path.split('/').pop()}`;
+            })
+            .catch(() => { status.textContent = 'Failed to analyse image.'; });
+    }
+</script>
